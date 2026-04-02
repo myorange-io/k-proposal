@@ -568,7 +568,29 @@ PYTHON=~/.claude/skills/k-proposal/.venv/bin/python3
 HANDLER="$PYTHON ~/.claude/skills/k-proposal/hwpx_handler.py"
 ```
 
-**HWPX 실행 순서** (테이블 셀 채우기만 수행, 구조 변경 최소화):
+#### 4-B-0. DOCX → HWPX 콘텐츠 대조표 작성 (HWPX 작업 전 필수)
+
+4-A에서 생성한 DOCX의 모든 콘텐츠 블록을 열거하고, 각각이 HWPX의 어느 위치에 들어가는지 매핑한다. **이 표를 완성하기 전에 HWPX 작업을 시작하지 않는다.**
+
+| DOCX 콘텐츠 | HWPX 매핑 위치 | 입력 방법 | 상태 |
+|-----------|-------------|---------|------|
+| 기업정보 (회사명·주소 등) | T1 테이블 셀 | fill | ⬜ |
+| 요약표 | T3 테이블 셀 | fill | ⬜ |
+| 사업 배경·목적 (ㅇ/- 서술) | 본문 개조식 단락 | lxml Step 2 | ⬜ |
+| Why Now 서술 | 본문 개조식 단락 | lxml Step 2 | ⬜ |
+| Why Us + 경쟁사 비교표 | 본문 개조식 단락 + T 테이블 | fill + lxml Step 2 | ⬜ |
+| Why 지원 필요 + 재무 수치 | 본문 개조식 단락 | lxml Step 2 | ⬜ |
+| 인력/파트너/보유기술 | T5~T8 테이블 셀 | fill + add-rows | ⬜ |
+| 정량적 목표 + 증빙 기준 | T10 테이블 셀 | fill | ⬜ |
+| 추진일정 | T14 테이블 셀 | fill | ⬜ |
+| 소요예산 + 산출근거 | T15 테이블 셀 | fill | ⬜ |
+| 기대효과 (ㅇ/- 서술) | 본문 개조식 단락 | lxml Step 2 | ⬜ |
+| 지역성 서술 | 본문 개조식 단락 | lxml Step 2 | ⬜ |
+| 시각 자료 (차트·아키텍처) | BinData + hp:pic | insert_image.py | ⬜ |
+
+HWPX 양식의 실제 구조에 따라 위 표를 조정한다. **⬜ 항목이 모두 ✅가 될 때까지 Phase 4-B를 완료하지 않는다.**
+
+**HWPX 실행 순서:**
 1. **read-table**로 테이블 구조 파악 (빈셀 ✎ 확인)
 2. fill_data.json 작성 → **fill --validate**로 사전 검증
 3. 기업정보 입력 (T1)
@@ -578,13 +600,9 @@ HANDLER="$PYTHON ~/.claude/skills/k-proposal/hwpx_handler.py"
 7. 소요예산 입력 (T15) — 공수 기반 산출근거 포함
 8. 요약표 입력 (T3) — 첫인상 최적화 후 저장
 9. 서명란 (T22)
-
-**주의: 아래 작업은 HWPX 파일 손상 위험이 높으므로 신중하게 수행한다:**
-10. 작성요령 삭제 (T4, T9, T11, T16, T18) — **remove-guides** ⚠️
-11. 본문 서술 삽입 — **insert-text** ⚠️
-12. 시각 자료 삽입 — **insert-image** ⚠️
-
-→ 9단계까지만 수행하고 한글에서 열리는지 확인 후, 10~12는 한글에서 직접 작업하거나 DOCX를 메인으로 사용하는 것을 권장
+10. **본문 서술 채우기** — lxml Step 2 (아래 "SECTIONS 자동 생성" 절차 따를 것)
+11. 시각 자료 삽입 — **insert_image.py** (Step 4)
+12. 작성요령 삭제 — **remove-guides** ⚠️ (손상 위험, 마지막에 수행)
 
 ### fill_data.json 형식
 ```json
@@ -659,16 +677,37 @@ hwpx_handler의 remove-guides/insert-text 대신 lxml로 직접 처리한다.
 - `<hp:t>` 텍스트를 직접 교체하거나, `<hp:t>`가 없으면 `<hp:run>` 안에 생성
 - **인덱스 기반이 아닌 텍스트 패턴 매칭** 사용 (fill 후 인덱스 변경 위험 회피)
 
+**SECTIONS 자동 생성 절차 (빈 배열로 두지 않는다):**
+
+HWPX 양식의 개조식 단락 위치를 먼저 파악한 뒤, DOCX의 서술 내용을 그대로 옮긴다.
+
+```bash
+# 1) 양식에서 ㅇ/◦/- 로 시작하는 단락의 앞 헤더 텍스트를 추출
+$HANDLER analyze "양식.hwpx" -t 0 -a | grep -E "^[IVⅠ-Ⅵ]|주력|사업|현황|배경|목적|기대"
+```
+
+추출한 헤더 텍스트와 DOCX에 작성한 내용을 매핑하여 SECTIONS를 완성한다:
+
 ```python
-# 패턴 매칭 예시
+# DOCX에서 작성한 내용 그대로 SECTIONS에 반영
 SECTIONS = [
-    ('주력 사업 현황', [  # 앞 단락의 고유 텍스트
-        ("   ㅇ 첫 번째 내용", "     - 상세 설명"),  # (ㅇ, -)
-        ("   ㅇ 두 번째 내용", "     - 상세 설명"),
+    ('사업 배경 및 필요성', [        # HWPX 양식의 헤더 단락 텍스트
+        ("   ㅇ [Why Now 내용]", "     - [시장 데이터 + 출처]"),
+        ("   ㅇ [시급성 근거]",  "     - [정책/규제 변화]"),
     ]),
-    ...
+    ('주요 사업 내용', [
+        ("   ㅇ [핵심 기능 설명]",   "     - [구체적 구현 방식]"),
+        ("   ㅇ [차별점 — Why Us]",  "     - [경쟁사 대비 수치]"),
+    ]),
+    ('기대 효과', [
+        ("   ㅇ [정량 목표 1]",  "     - [달성 시점 + 증빙 방법]"),
+        ("   ㅇ [정량 목표 2]",  "     - [달성 시점 + 증빙 방법]"),
+    ]),
+    # ← 4-B-0 대조표의 "lxml Step 2" 항목이 모두 여기 포함되어야 함
 ]
 ```
+
+**체크**: SECTIONS를 완성한 뒤, 4-B-0 대조표의 "lxml Step 2" 행을 모두 ✅로 표시한다. 비어 있는 행이 있으면 SECTIONS에 추가하거나 fill로 처리한다.
 
 #### Step 3: 후처리 (필수!)
 ```python
@@ -698,6 +737,37 @@ for i, (mod_p, mod_text) in enumerate(mod_texts):
 from insert_image import insert_image_to_hwpx
 insert_image_to_hwpx("제출용.hwpx", "제출용.hwpx", "chart.png", after_table_index=9, width_cm=14)
 ```
+
+#### Step 5: DOCX ↔ HWPX 콘텐츠 최종 대조 검증
+
+Step 1~4 완료 후, 4-B-0 대조표를 기준으로 누락 항목을 최종 점검한다.
+
+```python
+# 제출용.hwpx에서 텍스트를 추출하여 핵심 키워드 존재 여부 확인
+import zipfile
+from lxml import etree
+
+HP = '{http://www.hancom.co.kr/hwpml/2011/paragraph}'
+with zipfile.ZipFile("제출용.hwpx") as zf:
+    root = etree.fromstring(zf.read('Contents/section0.xml'))
+
+all_text = ' '.join(
+    t.text for t in root.iter(f'{HP}t') if t.text
+)
+
+# DOCX에서 작성한 핵심 문구가 HWPX에도 있는지 확인
+checks = [
+    "Why Now 핵심 키워드",   # 예: "시장 성장률", "규제명"
+    "Why Us 핵심 키워드",    # 예: "경쟁사명", "차별점"
+    "Why 지원 핵심 키워드",  # 예: "런웨이", "BEP"
+    "기대효과 수치",          # 예: "매출 X억", "고용 N명"
+]
+for kw in checks:
+    status = "✅" if kw in all_text else "❌ 누락"
+    print(f"{status} — {kw}")
+```
+
+❌ 누락 항목이 있으면 해당 SECTIONS 항목을 추가하거나 fill_data.json에 셀을 보완한 뒤 Step 1~3을 재실행한다.
 
 ### 정량적 목표 작성 규칙 (T10)
 각 목표마다 반드시 검증 가능한 증빙 기준을 명시한다.
