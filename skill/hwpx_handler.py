@@ -362,10 +362,18 @@ class HwpxHandler:
             return True
 
         # Case 2: <hp:t>가 없지만 <hp:run>이 있으면, run 안에 <hp:t> 생성
+        # self-closing <hp:run charPrIDRef="X"/> 포함 — charPrIDRef 등 속성은 보존된 채로 확장됨
         first_run = first_p.find(f'{HP}run')
         if first_run is not None:
             new_t = etree.SubElement(first_run, f'{HP}t')
             new_t.text = text
+            # linesegarray 교체 (Case 1과 동일하게 적용)
+            for p in paragraphs:
+                for lsa in p.findall(f'{HP}linesegarray'):
+                    p.remove(lsa)
+                etree.SubElement(p, f'{HP}linesegarray')
+            if not preserve_style:
+                first_run.set('charPrIDRef', '79')
             return True
 
         # Case 3: <hp:run>도 없으면 최소한의 구조 생성 (다른 paragraph에서 스타일 복사)
