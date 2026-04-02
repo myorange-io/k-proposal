@@ -221,7 +221,7 @@ print(f'후처리 저장: {V10}')
 # ============================================================
 # 6. 이미지 삽입
 # ============================================================
-sys.path.insert(0, os.path.join(BASE, '_작업파일'))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from insert_image import insert_image_to_hwpx
 
 # 이미지 삽입: data/images.json이 있으면 로딩, 없으면 _시각자료/ 폴더 자동 탐색

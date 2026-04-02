@@ -794,6 +794,34 @@ for kw in checks:
 
 ❌ 누락 항목이 있으면 해당 SECTIONS 항목을 추가하거나 fill_data.json에 셀을 보완한 뒤 Step 1~3을 재실행한다.
 
+#### Step 6: HWPX 파일 자동 검증 (필수 — 제출 전 반드시 실행)
+
+```bash
+PYTHON=~/.claude/skills/k-proposal/.venv/bin/python3
+
+# 기본 검사 (ZIP 구조, XML 선언, 네임스페이스, charPr, 이미지 일관성)
+$PYTHON ~/.claude/skills/k-proposal/scripts/test_hwpx.py 제출용.hwpx
+
+# 원본 양식과 비교 포함 (linesegarray + 변경률 검사 추가)
+$PYTHON ~/.claude/skills/k-proposal/scripts/test_hwpx.py 제출용.hwpx --orig 원본양식.hwpx
+```
+
+**검사 항목 및 실패 시 조치:**
+
+| 검사 | 실패 원인 | 조치 |
+|------|---------|------|
+| `[ZIP] mimetype 첫 번째 엔트리` | insert_image 단독 호출 후 ZIP 재조립 누락 | postprocess_hwpx.py Step 7(ZIP 메타데이터 복원) 재실행 |
+| `[ZIP] mimetype ZIP_STORED` | 위와 동일 | 동일 |
+| `[XML] XML 선언 큰따옴표` | lxml이 작은따옴표로 직렬화 | build/postprocess XML 저장 시 `re.sub` 처리 확인 |
+| `[XML] 비표준 네임스페이스 프리픽스 없음` | fix_namespaces.py 미실행 | `postprocess_hwpx.py` Step 8 재실행 또는 `fix_namespaces.py` 직접 실행 |
+| `[STYLE] charPr ID=79 없음` | 템플릿에 ID=79 정의 없음 | `hwpx_handler analyze`로 실제 ID 확인 후 BLACK_STYLE 수정 |
+| `[STYLE] charPrIDRef 유효 ID 참조` | 존재하지 않는 charPr 참조 | 위와 동일 |
+| `[IMAGE] BinData 파일 manifest 등록` | content.hpf opf:item 등록 누락 | `insert_image_to_hwpx` 재실행 |
+| `[DIFF] 텍스트 변경 단락 있음 (0개)` | fill이 적용되지 않음 | data/fill_*.json 내용 확인 + `hwpx_handler fill --validate` 재실행 |
+| `[DIFF] linesegarray 빈 태그로 교체` | postprocess_hwpx.py 미실행 | postprocess_hwpx.py 재실행 |
+
+**모든 항목 ✅ 통과 후 Phase 5로 진행한다.**
+
 ### 정량적 목표 작성 규칙 (T10)
 각 목표마다 반드시 검증 가능한 증빙 기준을 명시한다.
 

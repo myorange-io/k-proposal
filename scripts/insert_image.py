@@ -406,10 +406,16 @@ def insert_image_to_hwpx(
             image_data = f.read()
         entries[bin_filename] = image_data
 
-        # ── 새 ZIP 작성 ──
+        # ── 새 ZIP 작성 (mimetype: 반드시 첫 엔트리, ZIP_STORED) ──
         os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
         with zipfile.ZipFile(output_path, "w", zipfile.ZIP_DEFLATED) as zf_out:
+            # mimetype은 HWPX spec 상 반드시 첫 번째 엔트리, STORED 압축
+            if "mimetype" in entries:
+                zf_out.writestr("mimetype", entries["mimetype"],
+                                compress_type=zipfile.ZIP_STORED)
             for name, data in entries.items():
+                if name == "mimetype":
+                    continue  # 이미 위에서 처리
                 if isinstance(data, bytes):
                     zf_out.writestr(name, data)
                 else:
