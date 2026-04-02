@@ -400,4 +400,4 @@ python scripts/postprocess_hwpx.py --base . --hwpx 제출용.hwpx --orig 원본�
 
 ## 라이선스
 
-[MIT License](LICENSE) © 2025 myorange-io
+[MIT License](LICENSE) © 2025 MyOrange
