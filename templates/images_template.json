@@ -1,0 +1,9 @@
+{
+  "_comment": "이미지 삽입 설정. file: _시각자료/ 폴더 내 파일명, after_table: 삽입할 테이블 뒤 인덱스(0-based), width_cm: 표시 너비",
+  "images": [
+    {"file": "시장규모_차트.png", "after_table": 4, "width_cm": 15},
+    {"file": "서비스_아키텍처.png", "after_table": 9, "width_cm": 15},
+    {"file": "추진일정_간트차트.png", "after_table": 14, "width_cm": 15},
+    {"file": "글로벌진출_로드맵.png", "after_table": 18, "width_cm": 15}
+  ]
+}

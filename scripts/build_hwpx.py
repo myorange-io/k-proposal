@@ -1,0 +1,195 @@
+#!/usr/bin/env python3
+"""HWPX 전체 생성 스크립트: 테이블 셀 채우기 + 개조식 본문 채우기
+
+사용법:
+  python build_hwpx.py --base /path/to/project --orig 원본.hwpx --out 출력.hwpx
+
+또는 스크립트 상단의 경로를 직접 수정하여 사용.
+"""
+import zipfile, shutil, os, re, copy, json, subprocess, sys, argparse
+from lxml import etree
+
+# ── 경로 설정 (프로젝트에 맞게 수정) ──
+BASE = os.environ.get("HWPX_BASE", os.getcwd())
+ORIG = os.environ.get("HWPX_ORIG", os.path.join(BASE, "원본양식.hwpx"))
+OUT = os.environ.get("HWPX_OUT", os.path.join(BASE, "제출용.hwpx"))
+HANDLER = os.path.expanduser("~/.claude/skills/k-proposal/.venv/bin/python3")
+HANDLER_PY = os.path.expanduser("~/.claude/skills/k-proposal/hwpx_handler.py")
+
+# CLI 인자 지원
+parser = argparse.ArgumentParser(description='HWPX 빌드')
+parser.add_argument('--base', default=BASE, help='프로젝트 디렉토리')
+parser.add_argument('--orig', default=ORIG, help='원본 양식 HWPX')
+parser.add_argument('--out', default=OUT, help='출력 HWPX')
+args, _ = parser.parse_known_args()
+BASE, ORIG, OUT = args.base, args.orig, args.out
+
+HP = '{http://www.hancom.co.kr/hwpml/2011/paragraph}'
+HH = '{http://www.hancom.co.kr/hwpml/2011/head}'
+HC = '{http://www.hancom.co.kr/hwpml/2011/core}'
+
+# ============================================================
+# 0. 원본 복사
+# ============================================================
+shutil.copy(ORIG, OUT)
+print(f"원본 복사: {OUT}")
+
+# ============================================================
+# 1단계: 테이블 셀 채우기 (hwpx_handler fill)
+# ============================================================
+# data/ 폴더 내 fill_*.json 파일을 순서대로 실행
+data_dir = os.path.join(BASE, "data")
+if os.path.isdir(data_dir):
+    for json_file in sorted(os.listdir(data_dir)):
+        if json_file.startswith('fill_') and json_file.endswith('.json'):
+            path = os.path.join(data_dir, json_file)
+            result = subprocess.run(
+                [HANDLER, HANDLER_PY, "fill", OUT, OUT, "--data", path],
+                capture_output=True, text=True
+            )
+            print(f"[{json_file}] {result.stdout.strip().split(chr(10))[-1]}")
+else:
+    print(f"WARN: data 디렉토리 없음: {data_dir}. fill_*.json 파일을 data/ 폴더에 넣어주세요.")
+
+# (하드코딩 예시 데이터 삭제됨)
+# 실제 사용 시 data/fill_사업계획서.json을 준비하면 위 1단계에서 자동 처리됩니다.
+# templates/ 폴더의 *_template.json을 data/로 복사 후 내용을 채워 사용하세요.
+
+# ============================================================
+# 2단계: 개조식 단락 채우기 (텍스트 패턴 매칭) — fill_all.py 방식
+# ============================================================
+with zipfile.ZipFile(OUT, 'r') as zf:
+    orig_infos = {info.filename: info for info in zf.infolist()}
+    all_files = {name: zf.read(name) for name in zf.namelist()}
+    namelist = zf.namelist()
+
+root = etree.fromstring(all_files['Contents/section0.xml'])
+children = list(root)
+
+BLACK_STYLE = "79"
+
+def get_text(elem):
+    return ''.join(t.text or '' for t in elem.iter(f'{HP}t')).strip()
+
+def set_text(elem, new_text):
+    for t in elem.iter(f'{HP}t'):
+        t.text = new_text
+        break
+    else:
+        for run in elem.iter(f'{HP}run'):
+            t = etree.SubElement(run, f'{HP}t')
+            t.text = new_text
+            break
+        else:
+            return False
+    for run in elem.iter(f'{HP}run'):
+        run.set('charPrIDRef', BLACK_STYLE)
+    for lsa in elem.findall(f'{HP}linesegarray'):
+        elem.remove(lsa)
+    etree.SubElement(elem, f'{HP}linesegarray')
+    return True
+
+# 개조식 본문: data/sections.json이 있으면 로딩, 없으면 아래 하드코딩 사용
+sections_json = os.path.join(BASE, "data", "sections.json")
+if os.path.exists(sections_json):
+    with open(sections_json, 'r', encoding='utf-8') as f:
+        _sec_data = json.load(f)
+    SECTIONS = [(s['header_keyword'], s['pairs']) for s in _sec_data.get('sections', [])]
+    print(f"[sections.json] {len(SECTIONS)}개 섹션 로딩")
+else:
+    # (하드코딩 예시 데이터 삭제됨)
+    # 실제 사용 시 data/sections.json을 준비하세요.
+    # templates/sections_template.json을 data/sections.json으로 복사 후 내용을 채워 사용하세요.
+    SECTIONS = []
+    print("WARN: data/sections.json 없음. 개조식 단락 채우기를 건너뜁니다.")
+
+count = 0
+for header_keyword, pairs in SECTIONS:
+    header_idx = None
+    for i, child in enumerate(children):
+        if child.tag.split('}')[-1] == 'p' and header_keyword in get_text(child):
+            header_idx = i
+            break
+    if header_idx is None:
+        print(f"  WARN: header '{header_keyword}' not found")
+        continue
+
+    search_start = header_idx + 1
+    for pair in pairs:
+        o_text, dash_text = pair
+
+        if o_text is not None and dash_text is None:
+            for j in range(search_start, min(search_start + 5, len(children))):
+                child = children[j]
+                if child.tag.split('}')[-1] != 'p':
+                    continue
+                txt = get_text(child)
+                if txt in ['1.', '1', '']:
+                    if set_text(child, o_text):
+                        count += 1
+                    search_start = j + 1
+                    break
+            continue
+
+        if o_text is None:
+            for j in range(search_start, min(search_start + 5, len(children))):
+                child = children[j]
+                if child.tag.split('}')[-1] != 'p':
+                    continue
+                txt = get_text(child)
+                if txt == '-':
+                    if set_text(child, dash_text):
+                        count += 1
+                    search_start = j + 1
+                    break
+            continue
+
+        for j in range(search_start, min(search_start + 8, len(children))):
+            child = children[j]
+            if child.tag.split('}')[-1] != 'p':
+                continue
+            txt = get_text(child)
+            if txt in ['ㅇ', '◦', '']:
+                if set_text(child, o_text):
+                    count += 1
+                for k in range(j + 1, min(j + 3, len(children))):
+                    child2 = children[k]
+                    if child2.tag.split('}')[-1] != 'p':
+                        continue
+                    txt2 = get_text(child2)
+                    if txt2 in ['-', '']:
+                        if dash_text and set_text(child2, dash_text):
+                            count += 1
+                        search_start = k + 1
+                        break
+                else:
+                    search_start = j + 1
+                break
+
+print(f"\n개조식 단락 채움: {count}개")
+
+# ============================================================
+# 3단계: 저장 (XML 선언 큰따옴표 + 원본 ZIP 메타데이터 보존)
+# ============================================================
+xml_bytes = etree.tostring(root, xml_declaration=True, encoding='UTF-8', standalone=True)
+xml_str = xml_bytes.decode('utf-8')
+xml_str = re.sub(r'<\?xml[^?]*\?>', '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>', xml_str, count=1)
+all_files['Contents/section0.xml'] = xml_str.encode('utf-8')
+
+# header.xml, content.hpf도 따옴표 수정
+for key in ['Contents/header.xml', 'Contents/content.hpf']:
+    if key in all_files:
+        txt = all_files[key].decode('utf-8')
+        txt = re.sub(r'<\?xml[^?]*\?>', '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>', txt, count=1)
+        all_files[key] = txt.encode('utf-8')
+
+tmp = OUT + '.tmp'
+with zipfile.ZipFile(tmp, 'w') as zfout:
+    for name in namelist:
+        info = orig_infos.get(name)
+        if info:
+            zfout.writestr(info, all_files[name])
+        else:
+            zfout.writestr(name, all_files[name])
+os.replace(tmp, OUT)
+print(f"\nHWPX 저장 완료: {OUT}")

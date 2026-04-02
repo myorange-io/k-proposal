@@ -1,0 +1,255 @@
+{
+  "template_name": "AI 기업 사업화 자금 지원사업",
+  "organization": "부산AI실증지원센터 / (재)부산정보산업진흥원",
+  "year": 2026,
+  "tables": {
+    "T0": {
+      "name": "제목",
+      "table_index": 0,
+      "rows": 1, "cols": 1,
+      "editable": false,
+      "description": "AI 기업 사업화 자금 지원사업 신청서"
+    },
+    "T1": {
+      "name": "신청기업현황",
+      "table_index": 1,
+      "rows": 15, "cols": 7,
+      "editable": true,
+      "fields": {
+        "기업구분": {"row": 0, "col": 0, "note": "소기업/중기업 체크"},
+        "기업명": {"row": 2, "col": 2, "span": "2x1"},
+        "홈페이지": {"row": 2, "col": 5},
+        "대표자명": {"row": 3, "col": 1, "span": "2x2"},
+        "대표자연락처_사무실": {"row": 3, "col": 5},
+        "대표자연락처_휴대폰": {"row": 4, "col": 5},
+        "담당자_성명": {"row": 5, "col": 1},
+        "담당자_직위": {"row": 5, "col": 3},
+        "담당자_이메일": {"row": 6, "col": 1},
+        "담당자_연락처": {"row": 6, "col": 3},
+        "사업자등록번호": {"row": 7, "col": 1},
+        "법인등록번호": {"row": 7, "col": 3},
+        "설립일": {"row": 8, "col": 1},
+        "업종": {"row": 8, "col": 3},
+        "주소": {"row": 9, "col": 1, "span": "6x1"},
+        "상시근로자수": {"row": 10, "col": 1},
+        "자본금": {"row": 10, "col": 3},
+        "매출액_2023": {"row": 11, "col": 1},
+        "매출액_2024": {"row": 11, "col": 3},
+        "매출액_2025": {"row": 11, "col": 5},
+        "사업비_총액": {"row": 12, "col": 1},
+        "사업비_지원금": {"row": 12, "col": 3},
+        "사업명": {"row": 13, "col": 1, "span": "6x1"},
+        "사업기간": {"row": 14, "col": 1}
+      }
+    },
+    "T2": {
+      "name": "사업계획서_표지",
+      "table_index": 2,
+      "rows": 1, "cols": 1,
+      "editable": false
+    },
+    "T3": {
+      "name": "요약표",
+      "table_index": 3,
+      "rows": 17, "cols": 5,
+      "editable": true,
+      "fields": {
+        "회사소개": {"row": 3, "col": 2, "note": "2~3줄 회사 소개"},
+        "주요사업": {"row": 4, "col": 2, "note": "'24~'25년 기준 대표사업, 주요성과"},
+        "수상_선정이력": {"row": 5, "col": 2},
+        "사업명": {"row": 7, "col": 2},
+        "사업배경_목적": {"row": 8, "col": 2},
+        "주요_수행내용": {"row": 9, "col": 2, "note": "핵심 수행 내용 요약"},
+        "기대성과": {"row": 10, "col": 2},
+        "정량적목표_1": {"row": 12, "col": 2},
+        "정량적목표_2": {"row": 13, "col": 2},
+        "총사업비": {"row": 15, "col": 2},
+        "사업기간": {"row": 16, "col": 2}
+      }
+    },
+    "T4": {
+      "name": "작성요령_사업내용",
+      "table_index": 4,
+      "editable": false,
+      "guide": true,
+      "description": "작성 완료 후 삭제할 안내문"
+    },
+    "T5": {
+      "name": "인력현황_요약",
+      "table_index": 5,
+      "rows": 1, "cols": 4,
+      "editable": true,
+      "fields": {
+        "현재_재직인원": {"row": 0, "col": 1},
+        "추가_고용계획": {"row": 0, "col": 3}
+      }
+    },
+    "T6": {
+      "name": "인력현황_상세",
+      "table_index": 6,
+      "rows": 5, "cols": 6,
+      "editable": true,
+      "header_row": 0,
+      "expandable": true,
+      "columns": ["연번", "성명", "직위", "주요 담당업무", "경력 및 학력 등", "채용연월"]
+    },
+    "T7": {
+      "name": "파트너현황",
+      "table_index": 7,
+      "rows": 3, "cols": 5,
+      "editable": true,
+      "header_row": 0,
+      "expandable": true,
+      "columns": ["연번", "파트너명", "주요역량", "주요 협력사항", "비고"]
+    },
+    "T8": {
+      "name": "보유기술_실적",
+      "table_index": 8,
+      "rows": 4, "cols": 3,
+      "editable": true,
+      "header_row": 0,
+      "expandable": true,
+      "columns": ["구분", "명칭", "주요내용"]
+    },
+    "T9": {
+      "name": "작성요령_사업수행",
+      "table_index": 9,
+      "editable": false,
+      "guide": true
+    },
+    "T10": {
+      "name": "정량적목표",
+      "table_index": 10,
+      "rows": 3, "cols": 4,
+      "editable": true,
+      "header_row": 0,
+      "expandable": true,
+      "columns": ["구분", "목표지수", "목표치", "측정방법"]
+    },
+    "T11": {
+      "name": "작성요령_목표",
+      "table_index": 11,
+      "editable": false,
+      "guide": true,
+      "has_nested": true,
+      "nested_table_index": 12
+    },
+    "T12": {
+      "name": "정량적목표_예시",
+      "table_index": 12,
+      "editable": false,
+      "description": "T11 내부 중첩테이블 - 삭제 시 T11과 함께 삭제"
+    },
+    "T13": {
+      "name": "성능지표",
+      "table_index": 13,
+      "rows": 4, "cols": 6,
+      "editable": true,
+      "header_row": 0,
+      "expandable": true,
+      "columns": ["주요 성능지표", "단위", "개발목표", "세계최고수준(보유기업/보유국)", "가중치", "측정기관"]
+    },
+    "T14": {
+      "name": "추진일정",
+      "table_index": 14,
+      "rows": 6, "cols": 8,
+      "editable": true,
+      "header_row": 0,
+      "expandable": true,
+      "columns": ["세부내용", "M1", "M2", "M3", "M4", "M5", "M6", "비고"],
+      "note": "해당 월에 ● 또는 ■ 표시"
+    },
+    "T15": {
+      "name": "소요예산",
+      "table_index": 15,
+      "rows": 6, "cols": 5,
+      "editable": true,
+      "header_rows": [0, 1],
+      "expandable": true,
+      "columns": ["비목", "세목", "산출근거", "금액", "비율"],
+      "note": "총 사업비 2,000만원 한도, 비율은 자동계산 권장"
+    },
+    "T16": {
+      "name": "작성요령_예산",
+      "table_index": 16,
+      "editable": false,
+      "guide": true,
+      "has_nested": true,
+      "nested_table_index": 17
+    },
+    "T17": {
+      "name": "예산비목정의",
+      "table_index": 17,
+      "editable": false,
+      "description": "T16 내부 중첩테이블 - 비목별 사용가능 범위 참조용"
+    },
+    "T18": {
+      "name": "작성요령_기대효과",
+      "table_index": 18,
+      "editable": false,
+      "guide": true
+    },
+    "T19": {
+      "name": "개인정보동의서_제목",
+      "table_index": 19,
+      "editable": false
+    },
+    "T20": {
+      "name": "개인정보동의서_안내",
+      "table_index": 20,
+      "editable": false
+    },
+    "T21": {
+      "name": "개인정보동의서_내용",
+      "table_index": 21,
+      "editable": false,
+      "has_nested": true
+    },
+    "T22": {
+      "name": "서명란",
+      "table_index": 22,
+      "editable": true,
+      "fields": {
+        "날짜": {"row": 0, "col": 0},
+        "대표자명": {"row": 0, "col": 1},
+        "서명": {"row": 0, "col": 2}
+      }
+    }
+  },
+  "guide_tables": [4, 9, 11, 16, 18],
+  "writing_order": [
+    {"step": 1, "name": "기업 기본정보", "tables": ["T1"], "priority": "필수"},
+    {"step": 2, "name": "인력/파트너/실적", "tables": ["T5", "T6", "T7", "T8"], "priority": "필수"},
+    {"step": 3, "name": "사업 내용 서술", "tables": [], "priority": "필수", "note": "T4 삭제 후 본문 서술, 시각자료 삽입 권장"},
+    {"step": 4, "name": "목표 설정", "tables": ["T10", "T13"], "priority": "필수"},
+    {"step": 5, "name": "추진일정", "tables": ["T14"], "priority": "필수"},
+    {"step": 6, "name": "소요예산", "tables": ["T15"], "priority": "필수"},
+    {"step": 7, "name": "기대효과 서술", "tables": [], "priority": "필수", "note": "T18 삭제 후 본문 서술"},
+    {"step": 8, "name": "요약표", "tables": ["T3"], "priority": "필수", "note": "전체 완성 후 요약 작성"},
+    {"step": 9, "name": "작성요령 삭제", "tables": ["T4", "T9", "T11", "T16", "T18"], "priority": "필수"},
+    {"step": 10, "name": "서명", "tables": ["T22"], "priority": "필수"}
+  ],
+  "budget_rules": {
+    "총한도_공고기준": 30000000,
+    "총한도_서식예시": 20000000,
+    "참고": "공고문 기준 최대 3,000만원, 작성서식 예시는 2,000만원 기준",
+    "비목": {
+      "일반운영비": {
+        "일반수용비": "범용S/W, 홍보물제작비, 소모성물품, 검정료, 시험료, 수수료",
+        "임차료": "시설, 장비, 물품 임차료, 리스료"
+      },
+      "광고선전비": "TV, 신문, 잡지 광고료",
+      "재료비": {
+        "일반재료비": "생산 소비 물적 재화 비용"
+      },
+      "연구개발비": {
+        "전산개발비": "솔루션/시스템 외주개발비",
+        "시험분석비": "외부 기관 시험 의뢰비"
+      },
+      "인건비": {
+        "보조연구원인건비": "연구 참여 보조인건비(신규채용자 3개월)"
+      },
+      "위탁용역비": "기업부설연구소 등에 위탁"
+    }
+  }
+}

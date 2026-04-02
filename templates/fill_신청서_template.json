@@ -1,0 +1,27 @@
+{
+  "_comment": "신청서(T1) 기업정보 입력 템플릿. 프로젝트에 맞게 text 값을 수정하여 사용.",
+  "cells": [
+    {"table_index": 1, "row": 0, "col": 1, "text": "☑ 중소기업", "preserve_style": true},
+    {"table_index": 1, "row": 0, "col": 2, "text": "☐ 중견기업", "preserve_style": true},
+    {"table_index": 1, "row": 0, "col": 3, "text": "☐ 기타", "preserve_style": true},
+    {"table_index": 1, "row": 2, "col": 2, "text": "(기업명)", "preserve_style": true},
+    {"table_index": 1, "row": 2, "col": 4, "text": "(홈페이지)", "preserve_style": true},
+    {"table_index": 1, "row": 3, "col": 1, "text": "(대표자명)", "preserve_style": true},
+    {"table_index": 1, "row": 3, "col": 3, "text": "(사무실 전화번호)", "preserve_style": true},
+    {"table_index": 1, "row": 4, "col": 0, "text": "(휴대폰)", "preserve_style": true},
+    {"table_index": 1, "row": 5, "col": 1, "text": "(설립일자)", "preserve_style": true},
+    {"table_index": 1, "row": 5, "col": 2, "text": "(이메일)", "preserve_style": true},
+    {"table_index": 1, "row": 6, "col": 1, "text": "(사업자등록번호)", "preserve_style": true},
+    {"table_index": 1, "row": 6, "col": 3, "text": "(직원수)", "preserve_style": true},
+    {"table_index": 1, "row": 7, "col": 1, "text": "(주소)", "preserve_style": true},
+    {"table_index": 1, "row": 8, "col": 1, "text": "(24년 매출액, 백만원)", "preserve_style": true},
+    {"table_index": 1, "row": 8, "col": 3, "text": "(25년 매출액, 백만원)", "preserve_style": true},
+    {"table_index": 1, "row": 9, "col": 2, "text": "(실무담당자 성명)", "preserve_style": true},
+    {"table_index": 1, "row": 9, "col": 4, "text": "(부서/직위)", "preserve_style": true},
+    {"table_index": 1, "row": 10, "col": 1, "text": "(실무담당자 연락처)", "preserve_style": true},
+    {"table_index": 1, "row": 10, "col": 3, "text": "(실무담당자 이메일)", "preserve_style": true},
+    {"table_index": 1, "row": 11, "col": 2, "text": "(AI 솔루션명)", "preserve_style": true},
+    {"table_index": 1, "row": 12, "col": 1, "text": "(AI 솔루션 상세설명 — 기술, 용도, 주요 성과 등)", "preserve_style": true},
+    {"table_index": 1, "row": 13, "col": 2, "text": "(지원사업 필요사유 — 자금 조달의 필요성 등 자유롭게 작성)", "preserve_style": true}
+  ]
+}
