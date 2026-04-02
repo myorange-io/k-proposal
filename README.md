@@ -12,7 +12,7 @@
 - 회사 자료(재무제표, 서비스 소개서 등)를 분석해서 사업계획서에 반영
 - 심사위원이 싫어하는 표현(광탈 패턴)을 자동으로 걸러냄
 - AI가 쓴 티가 나는 문장을 사람이 쓴 것처럼 바꿔줌 (휴먼라이징)
-- 시장규모 차트, 서비스 아키텍처 등 시각 자료 자동 생성
+- 시장규모 차트, 서비스 아키텍처, KPI 인포그래픽 등 시각 자료 자동 생성 (브랜드 색상 자동 추출)
 - 최종 제출용 HWPX 파일 자동 생성 (DOCX는 요청 시 추가 생성)
 
 ---
@@ -51,11 +51,18 @@
 ### Step 2. Claude Code에 스킬 설치
 
 ```bash
-# 스킬 폴더에 복사
-cp -r skill/* ~/.claude/skills/k-proposal/
+# 방법 1: Git clone (추천)
+git clone https://github.com/myorange-io/k-proposal.git
+cp -r k-proposal/skill/* ~/.claude/skills/k-proposal/
+
+# 방법 2: ZIP 다운로드
+# GitHub 페이지 → Code → Download ZIP → 압축 해제 후 아래 명령 실행
+cp -r k-proposal/skill/* ~/.claude/skills/k-proposal/
 
 # 의존성 설치
 pip install lxml python-docx matplotlib Pillow
+# Gemini 이미지 생성 사용 시 추가 설치
+pip install google-genai
 ```
 
 ### Step 3. 실행
@@ -221,18 +228,22 @@ xml_str = re.sub(r'<\?xml[^?]*\?>',
 
 ## 산출물 형식
 
-**DOCX가 메인 산출물**, **HWPX는 보조 산출물**.
+**HWPX가 메인 산출물**, **DOCX는 요청 시 추가 생성**.
 
-- DOCX: python-docx로 양식 구조에 맞춘 문서 직접 생성 (테이블·본문·이미지 포함)
-- HWPX: 원본 양식의 테이블 셀에 데이터를 채우고, 개조식 본문을 lxml로 직접 조작
+- HWPX: 원본 양식의 테이블 셀에 데이터를 채우고, 개조식 본문을 lxml로 직접 조작 + 시각 자료 삽입
+- DOCX: 사용자가 "DOCX도 만들어줘"라고 요청할 때만 python-docx로 생성
 
 ## 사용법
 
 ### 1. Claude Code에 스킬 등록
 
-`skill/` 폴더의 파일을 Claude Code 스킬 디렉토리에 복사한다.
-
 ```bash
+# 방법 1: Git clone (추천)
+git clone https://github.com/myorange-io/k-proposal.git
+cp -r k-proposal/skill/* ~/.claude/skills/k-proposal/
+
+# 방법 2: 이미 clone한 경우 (업데이트 시)
+cd k-proposal && git pull
 cp -r skill/* ~/.claude/skills/k-proposal/
 ```
 
@@ -303,17 +314,27 @@ Phase 1         Phase 2          Phase 3           Phase 3.5        Phase 4     
 
 | 유형 | 도구 | 이유 |
 |------|------|------|
-| 데이터 차트 (시장규모, 매출, 간트차트) | matplotlib (Pretendard 폰트) | 한국어 텍스트 정확, 수치 정밀 |
+| 데이터 차트 / 인포그래픽 (시장규모, 매출, KPI 카드) | matplotlib | 한국어 폰트 정확, 수치 정밀 |
 | 개념도/아키텍처/로드맵 | 나노 바나나 프로 (Gemini, 영문) | 시각적 완성도 높음. 한국어는 깨짐 |
 
+지원 차트 타입: `bar`, `horizontal_bar`, `line`, `area`, `pie`, `donut`, `stacked_bar`, `grouped_bar`, `infographic`
+
 ```bash
-# matplotlib 차트
 PYTHON=~/.claude/skills/k-proposal/.venv/bin/python3
 VGEN="$PYTHON ~/.claude/skills/k-proposal/visual_gen.py"
-$VGEN chart config.json -o chart.png
 
-# Gemini 이미지 (영문)
-$VGEN gemini "Draw an architecture diagram for..." -o arch.png --style diagram
+# 단일 차트 생성
+$VGEN chart config.json -o _시각자료/chart.png
+
+# 변형 3개 생성 (브랜드 색상 자동 탐색 + 기본 팔레트 2종)
+$VGEN chart config.json -o _시각자료/chart.png --count 3 --auto-brand
+
+# 로고 이미지 지정해서 브랜드 색상 추출
+$VGEN chart config.json -o _시각자료/chart.png --count 3 --brand-image 로고.png
+
+# Gemini 이미지 (영문 프롬프트, 변형 3개)
+$VGEN gemini "Service architecture: mobile app → API → AI engine → DB" \
+  -o _시각자료/arch.png --style diagram --count 3
 ```
 
 ### 6. HWPX 양식 분석 명령어
@@ -349,7 +370,7 @@ $HANDLER add-rows "양식.hwpx" "출력.hwpx" -t 7 -n 5 --template-row 1
 | 약어 | 첫 등장 시 영문 풀네임 + 한국어 설명 병기 |
 | 예산 | "1식" 금지. 공수 기반 산출. 전산개발비는 외주 용역 표현 |
 | 시장 데이터 | 제품 직접 타겟 시장 데이터 사용. 연결 논리 필수 |
-| 시각 자료 | 차트: matplotlib(Pretendard). 개념도: Gemini(영문) |
+| 시각 자료 | 차트/인포그래픽: matplotlib (브랜드 색상 자동 추출, `--count 3`으로 변형 생성). 개념도: Gemini(영문) |
 | 광탈 패턴 | "세계 최고 수준", "혁신적인", "본 사업은~" 등 금지 |
 
 ## 의존성

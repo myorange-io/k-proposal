@@ -506,42 +506,79 @@ run.underline = True
 - 이미지가 없으면 HWPX 삽입 단계에서 건너뜀 — **목록을 만들고 전부 생성 완료한 뒤 Phase 4로 진행**
 
 **생성 전략 (혼합 방식 권장)**:
-- **데이터 차트** (시장규모, 매출추이, 간트차트 등) → **matplotlib** 사용
+- **데이터 차트 + 인포그래픽** (시장규모, 매출추이, KPI 카드 등) → **matplotlib** 사용
   - 이유: 한국어 텍스트 정확, 수치 정밀 제어 가능
-  - 폰트 우선순위: Pretendard > AppleGothic(macOS) > Malgun Gothic(Windows)
-  - **글자 겹침 방지 필수**: `plt.tight_layout()` 호출, 바 차트 라벨은 `ha='center', va='bottom'`으로 위치 지정, 긴 텍스트는 `\n` 줄바꿈 처리
-  - **불필요 주석 금지**: 시장규모 차트에 '본 사업 시점' 화살표·마커 등 자의적 해석 요소를 추가하지 않는다. 데이터와 출처만 표시
-  ```python
-  import matplotlib.font_manager as fm
-  fonts = [f.name for f in fm.fontManager.ttflist if 'pretendard' in f.name.lower()]
-  FONT = 'Pretendard' if fonts else 'AppleGothic'
-  plt.rcParams['font.family'] = FONT
-  ```
-- **개념도/아키텍처/로드맵/인포그래픽** → **나노 바나나 프로(Gemini) 영문**으로 생성
-  - 이유: Gemini 이미지 생성의 한국어 렌더링이 불안정하여 텍스트가 깨짐
-  - 영문 버전을 HWPX/DOCX에 삽입, 한국어 버전은 `_KR` 접미사로 별도 보관
-  - 한국어 버전은 참고용으로 함께 생성하되, 텍스트 깨짐 감안
+  - 폰트 자동 탐색 우선순위: Pretendard → NotoSansKR → AppleSDGothicNeo → Malgun Gothic → NanumGothic → AppleGothic
+  - **브랜드 색상 자동 추출**: 로고·소개서·IR 이미지가 있으면 자동으로 색상 추출 + 가독성 보정 적용
+  - **불필요 주석 금지**: 데이터와 출처만 표시, '본 사업 시점' 화살표 등 자의적 요소 추가 금지
+- **개념도/아키텍처/로드맵** → **나노 바나나 프로(Gemini) 영문**으로 생성
+  - 이유: Gemini 한국어 렌더링 불안정 → 텍스트 깨짐
+  - 영문으로 생성해 HWPX에 삽입
 
 ```bash
 PYTHON=~/.claude/skills/k-proposal/.venv/bin/python3
 VGEN="$PYTHON ~/.claude/skills/k-proposal/visual_gen.py"
 
-# 나노 바나나 프로 (Gemini) — 아키텍처, 서비스 소개 등
-$VGEN gemini "프롬프트" -o output.png --style diagram
+# ── Matplotlib 차트 / 인포그래픽 ──────────────────────────────────
+# 단일 생성
+$VGEN chart config.json -o _시각자료/market_size.png
 
-# Matplotlib — 시장규모 차트, 매출 추이 등 숫자 기반
-$VGEN chart config.json -o output.png
+# 변형 3개 생성 (팔레트별: 브랜드추출/블루/모노크롬)
+$VGEN chart config.json -o _시각자료/market_size.png --count 3
 
-# Mermaid — 프로세스 플로우, 워크플로우 등
-$VGEN mermaid "graph TD; ..." -o output.png
+# 브랜드 이미지 지정해서 색상 추출
+$VGEN chart config.json -o _시각자료/market_size.png --brand-image 로고.png --count 3
+
+# 현재 폴더에서 로고/소개서 이미지 자동 탐색해서 브랜드 색상 적용
+$VGEN chart config.json -o _시각자료/market_size.png --auto-brand --count 3
+
+# ── Gemini (아키텍처, 서비스 소개, 개념도) ──────────────────────────
+$VGEN gemini "Service architecture diagram: mobile app → API server → AI engine → database" \
+  -o _시각자료/arch.png --style diagram
+
+# 변형 3개 생성
+$VGEN gemini "..." -o _시각자료/arch.png --style diagram --count 3
+
+# ── Mermaid (프로세스, 워크플로우) ──────────────────────────────────
+$VGEN mermaid "graph TD; A[접수] --> B[심사] --> C[선정]" -o _시각자료/flow.png
 ```
 
-스타일 옵션: `diagram`, `infographic`, `flowchart`, `chart`, `timeline`, `service`, `comparison`
+**지원 차트 타입** (`config.json`의 `"type"` 값):
 
-**디자인 시스템**: 오렌지임팩트 브랜드 가이드 내장
-- 오렌지(#FF6D00) + 블루(#2563EB) 포인트
-- 미니멀 카드형 UI, 둥근 모서리
-- 텍스트 선명도 최적화 (큰 폰트, 키워드 위주, 명암 대비)
+| 타입 | 설명 | 적합한 용도 |
+|------|------|------------|
+| `bar` | 세로 막대 | 연도별 매출, 시장규모 비교 |
+| `horizontal_bar` | 가로 막대 | 경쟁사 비교, 항목별 점수 |
+| `line` | 꺾은선 | 성장 추이, 시계열 |
+| `area` | 면적 | 누적 성장 강조 |
+| `pie` | 원형 | 시장점유율, 비율 |
+| `donut` | 도넛 | 중앙 텍스트 강조 가능 |
+| `stacked_bar` | 누적 막대 | 매출 구성, 카테고리 분해 |
+| `grouped_bar` | 그룹 막대 | 연도×부문 비교 |
+| `infographic` | KPI카드+차트 | 핵심 수치 요약 페이지 |
+
+**인포그래픽 JSON 예시**:
+```json
+{
+  "type": "infographic",
+  "title": "사업 현황 요약",
+  "kpis": [
+    {"value": "1,200억원", "label": "목표 시장 규모"},
+    {"value": "32%", "label": "연평균 성장률(CAGR)"},
+    {"value": "3년", "label": "목표 BEP 달성 시점"}
+  ],
+  "chart": {
+    "type": "bar",
+    "title": "연도별 매출 목표",
+    "x": ["2025", "2026", "2027"],
+    "y": [3.5, 8.0, 18.0],
+    "ylabel": "매출(억원)"
+  },
+  "source": "출처: 자체 추정"
+}
+```
+
+**Gemini 스타일 옵션**: `diagram`, `infographic`, `flowchart`, `chart`, `timeline`, `service`, `comparison`
 
 ---
 
