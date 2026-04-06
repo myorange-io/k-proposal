@@ -106,15 +106,20 @@ class HwpxHandler:
         self._header_tree = None
 
     def extract(self):
-        """HWPX 파일을 임시 디렉토리에 압축 해제"""
+        """HWPX 파일을 임시 디렉토리에 압축 해제 (손상 ZIP 자동 복구 포함)"""
         self.temp_dir = Path(tempfile.mkdtemp(prefix='hwpx_'))
-        with zipfile.ZipFile(self.hwpx_path, 'r') as zf:
-            zf.extractall(self.temp_dir)
-        with zipfile.ZipFile(self.hwpx_path, 'r') as zf:
-            self._original_namelist = zf.namelist()
-            # 원본 ZIP 엔트리 메타데이터 보존 (압축 방식 등)
-            self._original_zipinfo = {info.filename: info for info in zf.infolist()}
-        # 모든 섹션 파일 파싱
+        self._recovered_zip = False
+        try:
+            with zipfile.ZipFile(self.hwpx_path, 'r') as zf:
+                zf.extractall(self.temp_dir)
+            with zipfile.ZipFile(self.hwpx_path, 'r') as zf:
+                self._original_namelist = zf.namelist()
+                self._original_zipinfo = {info.filename: info for info in zf.infolist()}
+        except (zipfile.BadZipFile, Exception) as e:
+            print(f"[WARN] ZIP 오류: {e} — 손상 ZIP 복구 모드 시도", file=sys.stderr)
+            self._recover_broken_zip()
+            self._recovered_zip = True
+
         contents_dir = self.temp_dir / 'Contents'
         for section_file in sorted(contents_dir.glob('section*.xml')):
             idx = int(section_file.stem.replace('section', ''))
@@ -131,6 +136,88 @@ class HwpxHandler:
         if header_path.exists():
             self._header_tree = etree.parse(str(header_path))
         return self
+
+    def _recover_broken_zip(self):
+        """손상된 HWPX ZIP을 Local File Header 스캔으로 복구 (kordoc 알고리즘 포팅)"""
+        MAX_ENTRIES = 500
+        MAX_DECOMPRESS = 100 * 1024 * 1024
+
+        data = self.hwpx_path.read_bytes()
+        pos = 0
+        entry_count = 0
+        total_decompressed = 0
+        recovered_files = {}
+
+        while pos < len(data) - 30:
+            if data[pos:pos+4] != b'PK\x03\x04':
+                pos += 1
+                while pos < len(data) - 30:
+                    if data[pos:pos+4] == b'PK\x03\x04':
+                        break
+                    pos += 1
+                continue
+
+            entry_count += 1
+            if entry_count > MAX_ENTRIES:
+                break
+
+            method = struct.unpack_from('<H', data, pos + 8)[0]
+            comp_size = struct.unpack_from('<I', data, pos + 18)[0]
+            name_len = struct.unpack_from('<H', data, pos + 26)[0]
+            extra_len = struct.unpack_from('<H', data, pos + 28)[0]
+
+            if name_len > 1024 or extra_len > 65535:
+                pos += 30 + name_len + extra_len
+                continue
+
+            file_start = pos + 30 + name_len + extra_len
+            if file_start + comp_size > len(data):
+                break
+            if comp_size == 0 and method != 0:
+                pos = file_start
+                continue
+
+            name = data[pos + 30:pos + 30 + name_len].decode('utf-8', errors='replace')
+            if '..' in name or name.startswith('/'):
+                pos = file_start + comp_size
+                continue
+
+            file_data = data[file_start:file_start + comp_size]
+            pos = file_start + comp_size
+
+            try:
+                if method == 0:
+                    content = file_data
+                elif method == 8:
+                    import zlib
+                    content = zlib.decompress(file_data, -zlib.MAX_WBITS)
+                else:
+                    continue
+
+                total_decompressed += len(content)
+                if total_decompressed > MAX_DECOMPRESS:
+                    print("[WARN] 압축 해제 크기 초과 — 복구 중단", file=sys.stderr)
+                    break
+
+                recovered_files[name] = content
+            except Exception:
+                continue
+
+        if not recovered_files:
+            raise RuntimeError("손상된 HWPX에서 파일을 복구할 수 없습니다")
+
+        print(f"[INFO] 손상 ZIP에서 {len(recovered_files)}개 파일 복구", file=sys.stderr)
+
+        for name, content in recovered_files.items():
+            file_path = self.temp_dir / name
+            file_path.parent.mkdir(parents=True, exist_ok=True)
+            file_path.write_bytes(content)
+
+        self._original_namelist = list(recovered_files.keys())
+        self._original_zipinfo = {
+            name: zipfile.ZipInfo(filename=name)
+            for name in recovered_files
+        }
 
     def _serialize_xml(self, tree_or_root):
         """XML을 바이트로 직렬화 (namespace prefix 보존)"""

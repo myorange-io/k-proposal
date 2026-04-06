@@ -80,8 +80,18 @@ find . -maxdepth 3 \( \
 **분류가 불명확한 파일만** 사용자에게 용도를 확인한다.  
 파일이 전혀 없으면 "공고문과 작성서식 파일을 이 폴더에 넣어주세요" 안내 후 대기.
 
-> ⚠️ **`.hwp` (구버전 한글) 파일을 발견한 경우**: 이 스킬은 HWPX(ZIP+XML) 형식만 처리할 수 있습니다.  
-> `.hwp`는 바이너리 OLE 형식이라 읽기·쓰기 모두 불가합니다.  
+> **`.hwp` (구버전 한글) 파일을 발견한 경우 — 2가지 방법:**
+>
+> **방법 1 (자동, kordoc MCP 서버 설치 시):**
+> kordoc MCP가 설치되어 있으면 `.hwp` 파일을 직접 파싱하여 마크다운으로 변환할 수 있다.
+> ```bash
+> # kordoc MCP의 parse_document 도구로 .hwp 읽기
+> # → 공고문 분석/참고자료 분석에 활용 가능 (쓰기는 HWPX만 지원)
+> ```
+> 단, `.hwp`로의 **쓰기/생성은 불가**. 최종 산출물은 반드시 HWPX로 생성한다.
+>
+> **방법 2 (수동 변환):**
+> kordoc MCP가 없거나 HWPX 양식이 필요한 경우:
 > 한글에서 해당 파일을 열고 **파일 → 다른 이름으로 저장 → 파일 형식: HWPX**로 저장한 뒤 다시 알려주세요.
 
 ---
@@ -89,7 +99,19 @@ find . -maxdepth 3 \( \
 ## Phase 1: 공고문 + 양식 분석 (자동)
 
 ### 1-1. 공고문 분석
-Phase 0에서 탐색한 공고문 파일(HWPX/PDF)에서 텍스트를 추출하고 구조화한다.
+Phase 0에서 탐색한 공고문 파일(HWPX/HWP/PDF)에서 텍스트를 추출하고 구조화한다.
+
+**kordoc MCP 활용 (설치 시 자동 적용):**
+- PDF 공고문: `parse_document`로 마크다운 변환 → 테이블 자동 추출, 머리글/바닥글 필터링
+- HWP 공고문: `parse_document`로 레거시 HWP5 바이너리 직접 파싱 (수동 변환 불필요)
+- `parse_form`으로 양식 필드 label-value 자동 인식 → 수동 매핑 작업 대폭 감소
+- `parse_table`로 특정 테이블만 정밀 추출 (예산표, 평가기준표)
+
+**텍스트 정제:**
+추출된 텍스트에 `text_sanitizer.py`의 정제 함수를 적용한다:
+- HWP 도형/OLE 자동생성 대체텍스트 제거 ("사각형입니다" 등 26종)
+- 균등배분 공백 복원 ("현 장 대 응" → "현장대응")
+- 연속 공백/탭 정리
 
 추출 항목:
 - 사업 개요 (사업명, 목적, 기간, 지원금액, 모집규모)
@@ -146,6 +168,18 @@ $HANDLER analyze "양식.hwpx" -t 1 -a
 $HANDLER read-table "양식.hwpx" -t 1
 $HANDLER read-table "양식.hwpx" -t 3 --json  # JSON 형식
 ```
+
+**template_map 자동 생성 (새 양식일 때):**
+```bash
+# 양식 분석 → template_map 초안 자동 생성
+$PYTHON scripts/auto_template_map.py "양식.hwpx" -o template_map_draft.json
+
+# kordoc parse_form 결과가 있으면 병합하여 정확도 향상
+$PYTHON scripts/auto_template_map.py "양식.hwpx" -o template_map_draft.json \
+  --kordoc-json form_fields.json
+```
+auto_template_map.py는 LABEL_KEYWORDS(성명, 주소, 사업명 등 40+개)로 라벨-값 쌍을 자동 감지하고,
+테이블 용도(신청서/요약/인력/예산 등)를 자동 분류한다. 초안 생성 후 수동 검토·보정이 필요하다.
 
 산출물: 테이블 인덱스, 행/열, 셀 매핑(빈셀 ✎ 표시), 병합 정보, 작성요령 테이블 위치
 
@@ -1056,3 +1090,72 @@ HWPX는 ZIP + XML 구조. 핵심 파일:
 - **remove-guides, insert-text는 파일 손상 위험** → 개조식 단락은 lxml 직접 조작(텍스트 패턴 매칭)으로 채움
 - HWPX가 열리지 않으면 사용자에게 알리고 Phase 4-opt(DOCX 생성) 진행 여부를 확인
 - HWPX 편집 후에는 반드시 한글에서 열리는지 확인한 뒤 다음 단계 진행
+- **손상 ZIP 자동 복구**: hwpx_handler.py가 자동으로 Local File Header 스캔 방식으로 복구 시도
+
+---
+
+## 문서 비교 (신구대조표)
+
+두 HWPX 문서를 블록 단위로 비교하여 변경 사항을 확인한다. 사업계획서 수정 이력 관리에 활용.
+
+```bash
+PYTHON=~/.claude/skills/k-proposal/.venv/bin/python3
+
+# 기본 비교 (마크다운 리포트)
+$PYTHON scripts/compare_docs.py "원본.hwpx" "수정본.hwpx"
+
+# 파일로 저장
+$PYTHON scripts/compare_docs.py "원본.hwpx" "수정본.hwpx" -o _비교결과.md
+
+# JSON 출력
+$PYTHON scripts/compare_docs.py "원본.hwpx" "수정본.hwpx" --json
+
+# 테이블만 비교
+$PYTHON scripts/compare_docs.py "원본.hwpx" "수정본.hwpx" --tables-only
+```
+
+kordoc MCP가 설치되어 있으면 `compare_documents` 도구로 크로스 포맷 비교도 가능하다 (HWP↔HWPX, PDF↔HWPX).
+
+---
+
+## Markdown → HWPX 하이브리드 워크플로우 (대안)
+
+기존 워크플로우(lxml 직접 조작)가 복잡한 경우, 마크다운 초안을 HWPX로 변환하는 하이브리드 접근도 가능하다.
+
+**사용 시나리오:**
+- 자유 서술 섹션이 많고 테이블이 적은 양식
+- 새 양식의 빠른 프로토타이핑
+- kordoc MCP가 설치된 환경
+
+**하이브리드 워크플로우:**
+```
+Phase 3 초안(md) → kordoc markdownToHwpx → 기본 HWPX 골격 생성
+                                              ↓
+                        원본 양식 + 기본 골격 → 수동 병합 (테이블 데이터는 기존 fill 사용)
+```
+
+**주의사항:**
+- kordoc의 markdownToHwpx는 MVP 수준으로 기본 단락·제목·테이블만 지원
+- 원본 양식의 정확한 레이아웃 재현이 필요하면 기존 lxml 워크플로우 권장
+- 하이브리드는 서술 영역 초안 → HWPX 변환 후 원본 양식에 병합하는 방식
+
+---
+
+## 한국어 텍스트 정제
+
+HWPX/HWP/PDF에서 추출한 텍스트를 AI 분석 전에 정제한다.
+
+```python
+from text_sanitizer import sanitize_korean_text, sanitize_blocks
+
+clean = sanitize_korean_text("현 장 대 응 단 장")  # → "현장대응단장"
+clean = sanitize_korean_text("사각형입니다.")          # → ""
+clean = sanitize_korean_text("  공백   정리  ")         # → "공백 정리"
+```
+
+정제 대상:
+- HWP 도형/OLE 자동생성 대체텍스트 26종 ("사각형입니다", "직사각형입니다" 등)
+- OLE 개체 원본 그림 설명 ("그림입니다. 원본 그림의 이름: …")
+- 균등배분 공백 ("현 장 대 응" → "현장대응")
+- 목차 리더 탭 + 페이지번호
+- 연속 공백/탭
