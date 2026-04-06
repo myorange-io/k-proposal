@@ -2,7 +2,7 @@
 """
 양식 자동 인식 → template_map.json 초안 자동 생성
 
-kordoc MCP의 parse_form 결과 또는 hwpx_handler의 analyze 결과를 조합하여
+hwpx_handler의 analyze 결과와 kordoc(설치 시 자동 사용)를 조합하여
 새 공고 양식에 대한 template_map.json 초안을 자동으로 생성한다.
 
 사용법:
@@ -15,6 +15,7 @@ import json
 import re
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 LABEL_KEYWORDS = {
@@ -138,6 +139,20 @@ def merge_kordoc_fields(template_map: dict, kordoc_json_path: str):
                         break
 
 
+def _try_kordoc_form(hwpx_path: str) -> dict | None:
+    """kordoc bridge를 통해 양식 필드 자동 추출 시도"""
+    try:
+        skill_dir = Path(__file__).parent.parent / "skill"
+        sys.path.insert(0, str(skill_dir))
+        from kordoc_bridge import get_bridge
+        bridge = get_bridge()
+        if bridge.available:
+            return bridge.parse_form(hwpx_path)
+    except ImportError:
+        pass
+    return None
+
+
 def generate_template_map(hwpx_path: str, kordoc_json_path: str = None) -> dict:
     """양식 HWPX를 분석하여 template_map 초안 생성"""
     tables = run_hwpx_handler(hwpx_path)
@@ -174,6 +189,19 @@ def generate_template_map(hwpx_path: str, kordoc_json_path: str = None) -> dict:
 
     if kordoc_json_path:
         merge_kordoc_fields(template_map, kordoc_json_path)
+    else:
+        form_result = _try_kordoc_form(hwpx_path)
+        if form_result:
+            with tempfile.NamedTemporaryFile(
+                mode='w', suffix='.json', delete=False, encoding='utf-8'
+            ) as f:
+                json.dump(form_result, f, ensure_ascii=False)
+                tmp_path = f.name
+            try:
+                merge_kordoc_fields(template_map, tmp_path)
+                template_map["_kordoc_auto"] = True
+            finally:
+                Path(tmp_path).unlink(missing_ok=True)
 
     return template_map
 

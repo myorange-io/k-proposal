@@ -2,11 +2,12 @@
 """
 문서 비교 (신구대조표) 유틸리티
 
-두 HWPX 문서의 텍스트를 블록 단위로 비교하여 변경 사항을 출력한다.
-kordoc MCP의 compare_documents가 설치되어 있으면 크로스 포맷(HWP↔HWPX) 비교도 가능하다.
+두 문서의 텍스트를 블록 단위로 비교하여 변경 사항을 출력한다.
+HWPX는 직접 파싱하고, HWP/PDF 등은 kordoc(설치 시 자동 사용)를 통해 변환 후 비교한다.
 
 사용법:
     python compare_docs.py "원본.hwpx" "수정본.hwpx"
+    python compare_docs.py "원본.hwp"  "수정본.hwpx"          # 크로스 포맷
     python compare_docs.py "원본.hwpx" "수정본.hwpx" -o diff_report.md
     python compare_docs.py "원본.hwpx" "수정본.hwpx" --tables-only
 """
@@ -263,17 +264,57 @@ def format_report(result: dict, file_a: str, file_b: str) -> str:
     return "\n".join(lines)
 
 
+def _extract_blocks_via_kordoc(file_path: str) -> list | None:
+    """kordoc bridge로 비-HWPX 파일에서 블록 추출"""
+    try:
+        skill_dir = Path(__file__).parent.parent / "skill"
+        sys.path.insert(0, str(skill_dir))
+        from kordoc_bridge import get_bridge
+        bridge = get_bridge()
+        if not bridge.available:
+            return None
+        md = bridge.parse(file_path)
+        if not md:
+            return None
+        blocks = []
+        for line in md.strip().split("\n"):
+            line = line.strip()
+            if not line:
+                continue
+            if line.startswith("|") and "|" in line[1:]:
+                blocks.append({"type": "table", "text": line})
+            else:
+                blocks.append({"type": "paragraph", "text": line})
+        return blocks
+    except ImportError:
+        return None
+
+
+def smart_extract_blocks(file_path: str) -> list:
+    """파일 확장자에 따라 적절한 추출 방법 선택"""
+    ext = Path(file_path).suffix.lower()
+    if ext == ".hwpx":
+        return extract_blocks(file_path)
+    blocks = _extract_blocks_via_kordoc(file_path)
+    if blocks is not None:
+        return blocks
+    if ext == ".hwpx":
+        return extract_blocks(file_path)
+    print(f"[warn] {ext} 파일은 kordoc가 필요합니다. setup.sh를 실행하세요.", file=sys.stderr)
+    return []
+
+
 def main():
-    parser = argparse.ArgumentParser(description="HWPX 문서 비교 (신구대조표)")
-    parser.add_argument("file_a", help="원본 HWPX 파일")
-    parser.add_argument("file_b", help="수정본 HWPX 파일")
+    parser = argparse.ArgumentParser(description="문서 비교 (신구대조표)")
+    parser.add_argument("file_a", help="원본 파일 (HWPX/HWP/PDF)")
+    parser.add_argument("file_b", help="수정본 파일 (HWPX/HWP/PDF)")
     parser.add_argument("-o", "--output", help="비교 결과 마크다운 파일 출력 경로")
     parser.add_argument("--json", action="store_true", help="JSON 형식으로 출력")
     parser.add_argument("--tables-only", action="store_true", help="테이블 블록만 비교")
     args = parser.parse_args()
 
-    blocks_a = extract_blocks(args.file_a)
-    blocks_b = extract_blocks(args.file_b)
+    blocks_a = smart_extract_blocks(args.file_a)
+    blocks_b = smart_extract_blocks(args.file_b)
 
     if args.tables_only:
         blocks_a = [b for b in blocks_a if b["type"] == "table"]

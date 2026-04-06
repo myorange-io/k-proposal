@@ -8,11 +8,13 @@
 
 ### 할 수 있는 것
 
-- 공고문(HWPX/PDF)을 읽고 평가기준, 예산규칙, 제출서류를 자동 정리
+- 공고문(HWPX/HWP/PDF)을 읽고 평가기준, 예산규칙, 제출서류를 자동 정리
 - 회사 자료(재무제표, 서비스 소개서 등)를 분석해서 사업계획서에 반영
+- 새 양식의 테이블 구조를 자동 인식하여 template_map 초안 생성
 - 심사위원이 싫어하는 표현(광탈 패턴)을 자동으로 걸러냄
 - AI가 쓴 티가 나는 문장을 사람이 쓴 것처럼 바꿔줌 (휴먼라이징)
 - 시장규모 차트, 서비스 아키텍처, KPI 인포그래픽 등 시각 자료 자동 생성 (브랜드 색상 자동 추출)
+- 두 문서를 비교하여 변경 내역을 신구대조표로 확인
 - 최종 제출용 HWPX 파일 자동 생성 (DOCX는 요청 시 추가 생성)
 
 ---
@@ -29,8 +31,8 @@
 
 | 자료 | 형식 | 왜 필요한가 |
 |------|------|-------------|
-| **모집공고문** | HWPX 또는 PDF | 평가기준, 예산규칙, 지원자격 파악 |
-| **작성서식** (사업계획서 양식) | **HWPX** (`.hwp` 구버전 불가) | 테이블 구조 분석 + 데이터 채우기 |
+| **모집공고문** | HWPX, HWP, PDF | 평가기준, 예산규칙, 지원자격 파악 |
+| **작성서식** (사업계획서 양식) | **HWPX** (`.hwp`는 kordoc MCP로 읽기만 가능) | 테이블 구조 분석 + 데이터 채우기 |
 | **사업자등록증** | PDF | 기업명, 대표자, 설립일, 주소, 업종 |
 | **최근 재무제표** (최소 1년) | PDF 또는 XLSX | 매출액, 자산, 부채 → 재무건전성 근거 |
 
@@ -48,22 +50,20 @@
 
 > **팁**: 자료가 부족해도 진행은 가능합니다. 하지만 재무제표 없이 매출 데이터를 쓰면 팩트체크에서 걸리고, 서비스 소개서 없이 기술 설명을 쓰면 내용이 얕아집니다. 가능한 한 많이 모아주세요.
 
-### Step 2. Claude Code에 스킬 설치
+### Step 2. 설치 (원스텝)
 
 ```bash
-# 방법 1: Git clone (추천)
 git clone https://github.com/myorange-io/k-proposal.git
-cp -r k-proposal/skill/* ~/.claude/skills/k-proposal/
-
-# 방법 2: ZIP 다운로드
-# GitHub 페이지 → Code → Download ZIP → 압축 해제 후 아래 명령 실행
-cp -r k-proposal/skill/* ~/.claude/skills/k-proposal/
-
-# 의존성 설치
-pip install lxml python-docx matplotlib Pillow
-# Gemini 이미지 생성 사용 시 추가 설치
-pip install google-genai
+cd k-proposal
+./setup.sh
 ```
+
+`setup.sh`가 아래를 한 번에 처리합니다:
+- Python 의존성 설치 (`lxml`, `python-docx`, `matplotlib`, `Pillow`)
+- kordoc 설치 확인 및 MCP 서버 자동 설정 (Node.js 있을 때)
+- Claude Code 스킬 등록 (`~/.claude/skills/k-proposal/`)
+
+> **Node.js가 없어도 기본 기능은 동작합니다.** kordoc은 HWP/PDF 고급 파싱을 위한 선택적 의존성으로, Node.js가 설치되어 있으면 자동으로 활성화됩니다.
 
 ### Step 3. 실행
 
@@ -118,11 +118,12 @@ AI: 현재 폴더에서 아래 파일을 찾았습니다.
 ```
 Phase 0         Phase 1         Phase 2          Phase 3       Phase 3.5      Phase 3.7       Phase 4        (Phase 4-opt)  Phase 5
 파일 탐색   → 공고/양식 분석 → 회사자료 분석 → 초안 작성 → 휴먼라이징 → 시각자료 생성 → HWPX 채우기 → DOCX(요청시) → 검토/제출
-HWP자동변환    kordoc활용       자동         협업 or 자동    자동(필수)     자동(필수)        자동(메인)                     AI 리뷰
+HWP자동파싱    kordoc활용       자동         협업 or 자동    자동(필수)     자동(필수)        자동(메인)                     AI 리뷰
 ```
 
 | Phase | 뭘 하나요? | 왜 필요한가요? |
 |-------|-----------|---------------|
+| 0. 파일 탐색 | 현재 폴더에서 공고문·양식·회사자료 자동 탐색. `.hwp`는 kordoc MCP로 자동 파싱 | 파일 경로 묻지 않고 바로 시작 |
 | 1. 공고/양식 분석 | 공고문에서 평가기준, 예산규칙, 일정 추출. 양식 테이블 구조 파악 | 평가기준에 맞춰 써야 점수가 높음 |
 | 2. 회사자료 분석 | 재무제표, 서비스소개서, 기존 계획서에서 정보 추출 | 실제 데이터로 써야 신뢰도가 높음 |
 | 3. 초안 작성 | 양식 구조에 맞게 핵심 3문(Why Now / Why Us / Why 지원) 포함 섹션별 작성 | 논리 구조가 합격의 핵심 |
@@ -141,17 +142,19 @@ HWP자동변환    kordoc활용       자동         협업 or 자동    자동(
 
 ---
 
-정부지원사업 사업계획서를 **공고문 분석 → 초안 작성 → 휴먼라이징 → DOCX 생성 + HWPX 채우기 → 검토 → 제출**까지 end-to-end로 처리하는 Claude Code 스킬 + 작업 스크립트.
+정부지원사업 사업계획서를 **파일 탐색 → 공고/양식 분석 → 초안 작성 → 휴먼라이징 → 시각자료 생성 → HWPX 채우기 → 검토 → 제출**까지 end-to-end로 처리하는 Claude Code / Cursor 스킬 + 작업 스크립트.
 
 ## 구조
 
 ```
 k-proposal/
+├── setup.sh                  # 원스텝 설치 (pip + kordoc + MCP 설정)
 ├── skill/                    # Claude Code 스킬 (SKILL.md + 핸들러)
 │   ├── SKILL.md              # 스킬 정의 (전체 워크플로우, 규칙, 체크리스트)
 │   ├── hwpx_handler.py       # HWPX 파일 분석/채우기/행추가 핸들러 (손상 ZIP 자동 복구 포함)
 │   ├── visual_gen.py         # 시각 자료 생성 (Gemini + matplotlib + mermaid)
 │   ├── text_sanitizer.py     # 한국어 텍스트 정제 (균등배분 공백, HWP 대체텍스트 제거)
+│   ├── kordoc_bridge.py      # kordoc CLI 브릿지 (MCP 없이 Python에서 직접 호출)
 │   └── template_map.json     # 템플릿 매핑 정보
 ├── scripts/                  # HWPX 빌드 파이프라인 스크립트
 │   ├── build_hwpx.py         # Step 1+2: 테이블 셀 채우기 + 개조식 본문 채우기
@@ -238,16 +241,14 @@ xml_str = re.sub(r'<\?xml[^?]*\?>',
 
 ## 사용법
 
-### 1. Claude Code에 스킬 등록
+### 1. 설치
 
 ```bash
-# 방법 1: Git clone (추천)
 git clone https://github.com/myorange-io/k-proposal.git
-cp -r k-proposal/skill/* ~/.claude/skills/k-proposal/
+cd k-proposal && ./setup.sh
 
-# 방법 2: 이미 clone한 경우 (업데이트 시)
-cd k-proposal && git pull
-cp -r skill/* ~/.claude/skills/k-proposal/
+# 업데이트 시
+cd k-proposal && git pull && ./setup.sh
 ```
 
 ### 2. 사업계획서 작성 요청
@@ -299,18 +300,20 @@ AI가 모든 결정을 내려 **한 번에 완성본을 생성**한다.
 ### 4. 전체 워크플로우
 
 ```
-Phase 1         Phase 2          Phase 3           Phase 3.5        Phase 4                    Phase 5
-공고/양식 분석 → 회사자료 분석 → 초안 작성 ────→ 즉시 휴먼라이징 → DOCX 생성 + HWPX 채우기 → 검토/제출
-  자동            자동         협업 or 자동        자동(필수)         자동(듀얼 산출)    AI 리뷰
+Phase 0         Phase 1         Phase 2          Phase 3           Phase 3.5        Phase 3.7       Phase 4          Phase 5
+파일 탐색   → 공고/양식 분석 → 회사자료 분석 → 초안 작성 ────→ 즉시 휴먼라이징 → 시각자료 생성 → HWPX 채우기 → 검토/제출
+HWP자동파싱    kordoc활용       자동         협업 or 자동        자동(필수)        자동(필수)        자동(메인)     AI 리뷰
 ```
 
 | Phase | 내용 | 산출물 |
 |-------|------|--------|
+| 0 | 현재 폴더 자동 탐색, 파일 용도 분류, `.hwp` 자동 파싱 | — |
 | 1 | 공고문 분석 (평가기준, 예산규칙, 일정), 양식 분석 (테이블 구조, 빈셀 매핑) | `_준비자료.md` |
 | 2 | 참고자료 분석 (서비스소개서, 재무제표, 기존 신청서 등) | `_준비자료.md` 추가 |
 | 3 | 핵심 3문(Why Now / Why Us / Why 지원 필요) 정의, 섹션별 초안 작성 (마크다운) | `_초안.md` |
 | 3.5 | AI 작성 흔적 제거, 개조식 명사형 문체 전환, 약어 설명 추가 | `_초안.md` 업데이트 |
-| 4 | DOCX 생성 (python-docx, 이미지 포함) + HWPX 양식 채우기 (빌드 파이프라인) | `.docx` + `.hwpx` |
+| 3.7 | 시장규모 차트, 서비스 아키텍처 등 시각자료 이미지 생성 | `_시각자료/` |
+| 4 | HWPX 양식 채우기 (빌드 파이프라인) + 시각자료 삽입. DOCX는 요청 시 추가 | `.hwpx` (+ `.docx`) |
 | 5 | 광탈 패턴 점검, 팩트체크, 시장 데이터 검증, 발표평가 Q&A 생성 | `_Q&A.md` |
 
 ### 5. 시각 자료 생성
@@ -365,6 +368,22 @@ $HANDLER fill "양식.hwpx" "출력.hwpx" --data data.json
 $HANDLER add-rows "양식.hwpx" "출력.hwpx" -t 7 -n 5 --template-row 1
 ```
 
+### 7. 양식 자동 인식 + 문서 비교
+
+```bash
+# 새 양식에 대한 template_map 초안 자동 생성
+python scripts/auto_template_map.py "양식.hwpx" -o template_map_draft.json
+
+# kordoc parse_form 결과를 병합하여 정확도 향상
+python scripts/auto_template_map.py "양식.hwpx" -o template_map_draft.json \
+  --kordoc-json form_fields.json
+
+# 두 HWPX 문서 비교 (신구대조표)
+python scripts/compare_docs.py "원본.hwpx" "수정본.hwpx"
+python scripts/compare_docs.py "원본.hwpx" "수정본.hwpx" -o _비교결과.md
+python scripts/compare_docs.py "원본.hwpx" "수정본.hwpx" --tables-only  # 테이블만 비교
+```
+
 ## 작성 규칙 요약
 
 | 규칙 | 내용 |
@@ -378,10 +397,19 @@ $HANDLER add-rows "양식.hwpx" "출력.hwpx" -t 7 -n 5 --template-row 1
 
 ## 의존성
 
+`./setup.sh`를 실행하면 아래 의존성이 자동으로 설치/설정됩니다.
+
+| 구분 | 패키지 | 필수 여부 |
+|------|--------|-----------|
+| Python (필수) | `lxml`, `python-docx`, `matplotlib`, `Pillow` | 필수 |
+| Python (선택) | `google-genai` | Gemini 이미지 생성 시 |
+| Node.js (선택) | `kordoc` (via npx) | HWP/PDF 고급 파싱, 문서 비교, 양식 인식 |
+
 ```bash
+# 수동 설치 시
 pip install lxml python-docx matplotlib Pillow
-# Gemini 이미지 생성 시
-pip install google-genai
+pip install google-genai              # Gemini 이미지 생성
+npm install -g kordoc                 # HWP/PDF 고급 파싱 (Node.js 필요)
 ```
 
 ## 새 프로젝트에서 사용하기
