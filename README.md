@@ -16,6 +16,7 @@
 - 시장규모 차트, 서비스 아키텍처, KPI 인포그래픽 등 시각 자료 자동 생성 (브랜드 색상 자동 추출)
 - 두 문서를 비교하여 변경 내역을 신구대조표로 확인
 - 최종 제출용 HWPX 파일 자동 생성 (DOCX는 요청 시 추가 생성)
+- **TIPS(팁스) 일반트랙 연구개발계획서** 전용 워크플로우 지원 (2026년 대개편 반영)
 
 ---
 
@@ -135,6 +136,63 @@ HWP자동파싱    kordoc활용       자동         협업 or 자동    자동(
 
 ---
 
+## TIPS(팁스) 일반트랙 연구개발계획서
+
+### TIPS란?
+
+민관공동창업자발굴육성(TIPS)은 민간 운영사(VC)가 선투자한 뒤 정부가 R&D 자금을 매칭 지원하는 프로그램입니다. 2026년 대개편으로 R&D 지원금이 최대 **8억원**으로 증액되었습니다.
+
+### TIPS 사용법
+
+```
+TIPS 연구개발계획서 작성해줘 /k-proposal
+```
+
+tips/ 폴더에 아래 파일을 넣으면 자동으로 TIPS 일반트랙 워크플로우가 활성화됩니다:
+
+```
+tips/
+├── 2026년+팁스+창업기업+지원계획+수정+공고.hwpx   ← 공고문
+├── 붙임1.+...+운영지침+...+본문.pdf               ← 운영지침 (208p)
+├── 붙임2.+...+운영지침+...+별지서식.hwpx           ← 양식 서식
+└── [붙임3] 팁스 신청방법...유의사항.pdf            ← 유의사항
+```
+
+### TIPS 전용 기능
+
+| 기능 | 설명 |
+|------|------|
+| 서류평가 4대항목 매칭 | 문제인식/실현가능성/성장전략/팀구성에 1:1 대응하는 섹션 자동 구성 |
+| 광탈 패턴 30개 | TIPS 특화 탈락 사유 자동 감지 ("4차 산업혁명", TRL 미기재, 팀 미분리 등) |
+| 분량 비율 가이드 | 기술 40% / 사업화 30% / 팀 30% 밸런스 자동 검증 |
+| 성능지표 역설계 | 선정 + 2년 후 최종평가 동시 달성을 위한 목표 수준 자동 판정 |
+| 후속 투자 시나리오 | TIPS R&D → Post-TIPS → 시리즈A 성장 사다리 자동 생성 |
+| 예산 자동 검증 | 2026년 인건비 단가, 비목별 한도, "1식" 금지 규칙 적용 |
+| 가점 자동 스캔 | 비수도권(3점), ESG(2점), 벤처인증(1점) 등 활용 가능한 가점 안내 |
+| 핵심 3문 | Why Now(기술 타이밍) / Why Us(팀+IP) / Why 정부 R&D(자력 불가 증명) |
+
+### TIPS 관련 파일
+
+| 파일 | 설명 |
+|------|------|
+| `tips/template_map_tips_일반트랙.json` | 별지 제3호(3-1) 본문1 테이블 T25~T79 매핑 + 예산 규칙 |
+| `tips/TIPS_리서치_2024_2026.md` | 최근 3년 통계, 합격/탈락 패턴, 최종평가 기준 등 리서치 레퍼런스 |
+| `templates/tips/fill_연구개발계획서_template.json` | 성능지표, 경쟁사, 고용, 사업화성과 테이블 셀 데이터 |
+| `templates/tips/sections_연구개발계획서_template.json` | 12개 서술형 본문 섹션 (4대 평가항목 매칭) |
+| `templates/tips/bold_keywords_tips_template.json` | 심사위원용 강조 키워드 6개 카테고리 |
+| `templates/tips/images_tips_template.json` | 아키텍처, 플로우차트, 시장규모 등 6종 이미지 설정 |
+
+### 2026년 TIPS 주요 변경사항
+
+- R&D 지원금: 5억 → **최대 8억원** (60% 증액)
+- 선정 규모: **800개사**
+- 접수 방식: 수시 → **분기별** (1, 2, 3분기 각 1회)
+- 선투자: 수도권 **2억+**, 비수도권 **1억+**
+- 가점: 최대 **5점** (비수도권 3점, ESG 2점, 벤처인증 1점, 퇴직연금 1점)
+- 비수도권 선정 **50% 우선 할당**
+
+---
+
 ## 상세 문서 (개발자/고급 사용자용)
 
 아래부터는 내부 구조, 빌드 파이프라인, 코드 수준의 상세 설명입니다.
@@ -150,18 +208,18 @@ HWP자동파싱    kordoc활용       자동         협업 or 자동    자동(
 k-proposal/
 ├── setup.sh                  # 원스텝 설치 (pip + kordoc + MCP 설정)
 ├── skill/                    # Claude Code 스킬 (SKILL.md + 핸들러)
-│   ├── SKILL.md              # 스킬 정의 (전체 워크플로우, 규칙, 체크리스트)
+│   ├── SKILL.md              # 스킬 정의 (전체 워크플로우 + TIPS 전용 워크플로우)
 │   ├── hwpx_handler.py       # HWPX 파일 분석/채우기/행추가 핸들러 (손상 ZIP 자동 복구 포함)
 │   ├── visual_gen.py         # 시각 자료 생성 (Gemini + matplotlib + mermaid)
 │   ├── text_sanitizer.py     # 한국어 텍스트 정제 (균등배분 공백, HWP 대체텍스트 제거)
 │   ├── kordoc_bridge.py      # kordoc CLI 브릿지 (MCP 없이 Python에서 직접 호출)
-│   └── template_map.json     # 템플릿 매핑 정보
+│   └── template_map.json     # 템플릿 매핑 정보 (일반 사업화 자금)
 ├── scripts/                  # HWPX 빌드 파이프라인 스크립트
 │   ├── build_hwpx.py         # Step 1+2: 테이블 셀 채우기 + 개조식 본문 채우기
 │   ├── postprocess_hwpx.py   # Step 3: diff 기반 후처리 (lineseg + 볼드밑줄 + 이미지 + 네임스페이스)
 │   ├── fix_namespaces.py     # 네임스페이스 정규화 (ns0:/ns1: → hh/hc/hp/hs)
 │   ├── insert_image.py       # HWPX 이미지 삽입 (merryAI 3단계 방식)
-│   ├── auto_template_map.py  # 양식 자동 인식 → template_map 초안 생성
+│   ├── auto_template_map.py  # 양식 자동 인식 → template_map 초안 생성 (TIPS 키워드 포함)
 │   ├── compare_docs.py       # 문서 비교 (신구대조표) — HWPX 블록 단위 diff
 │   └── fill_all_reference.py # 참고용: 테이블+개조식 통합 스크립트
 ├── templates/                # JSON 데이터 템플릿 (프로젝트별 data/ 폴더에 복사하여 사용)
@@ -169,7 +227,19 @@ k-proposal/
 │   ├── fill_사업계획서_template.json   # 사업계획서 테이블 (T3, T5~T8, T10, T13~T15, T22)
 │   ├── sections_template.json         # 개조식 본문 서술 (header_keyword + pairs)
 │   ├── bold_keywords_template.json    # 볼드+밑줄 강조 키워드
-│   └── images_template.json           # 이미지 삽입 설정 (파일명, 위치, 너비)
+│   ├── images_template.json           # 이미지 삽입 설정 (파일명, 위치, 너비)
+│   └── tips/                          # TIPS 일반트랙 전용 템플릿
+│       ├── fill_연구개발계획서_template.json     # 성능지표, 경쟁사, 사업화성과 셀 데이터
+│       ├── sections_연구개발계획서_template.json  # 12개 서술형 본문 (4대 평가항목 매칭)
+│       ├── bold_keywords_tips_template.json     # TIPS 심사 강조 키워드 6개 카테고리
+│       └── images_tips_template.json            # 아키텍처, 플로우차트 등 6종 이미지
+├── tips/                     # TIPS 일반트랙 관련 자료 + 매핑
+│   ├── template_map_tips_일반트랙.json           # 별지 제3호(3-1) T25~T79 테이블 매핑 + 예산 규칙
+│   ├── TIPS_리서치_2024_2026.md                  # 최근 3년 리서치 레퍼런스
+│   ├── 2026년+팁스+...+수정+공고.hwpx            # 공고문
+│   ├── 붙임1.+...+운영지침+...+본문.pdf          # 운영지침 (208p)
+│   ├── 붙임2.+...+운영지침+...+별지서식.hwpx     # 양식 서식
+│   └── [붙임3] 팁스 신청방법...유의사항.pdf      # 유의사항
 ├── references/               # 참조 문서
 │   └── xml-internals.md      # HWPX ZIP 구조, 네임스페이스, 단위 변환, XML 요소 상세
 ├── evals/                    # 품질 검증 테스트
@@ -414,6 +484,8 @@ npm install -g kordoc                 # HWP/PDF 고급 파싱 (Node.js 필요)
 
 ## 새 프로젝트에서 사용하기
 
+### 일반 사업화 자금
+
 ```bash
 # 1. 프로젝트 폴더 생성
 mkdir my-project && cd my-project
@@ -439,6 +511,28 @@ python scripts/build_hwpx.py --base . --orig 원본양식.hwpx --out 제출용.h
 python scripts/postprocess_hwpx.py --base . --hwpx 제출용.hwpx --orig 원본양식.hwpx
 
 # 6. 한글에서 열어 확인
+```
+
+### TIPS 일반트랙 연구개발계획서
+
+```bash
+# 1. 프로젝트 폴더에 TIPS 공고 자료 넣기
+mkdir my-tips-project && cd my-tips-project
+# tips/ 폴더에 공고문, 운영지침, 별지서식, 유의사항 복사
+
+# 2. 회사 자료 준비 (재무제표, 서비스소개서, 특허 등)
+# 폴더에 함께 넣기
+
+# 3. 스킬 실행 — TIPS 키워드가 감지되면 자동으로 전용 워크플로우 활성화
+# Claude Code / Cursor에서:
+TIPS 연구개발계획서 작성해줘
+
+# 4. data/ 폴더에 TIPS 전용 JSON 데이터 준비 (수동 빌드 시)
+mkdir data
+cp templates/tips/fill_연구개발계획서_template.json data/fill_tips.json
+cp templates/tips/sections_연구개발계획서_template.json data/sections_tips.json
+cp templates/tips/bold_keywords_tips_template.json data/bold_keywords.json
+cp templates/tips/images_tips_template.json data/images.json
 ```
 
 ## 참고한 저장소
