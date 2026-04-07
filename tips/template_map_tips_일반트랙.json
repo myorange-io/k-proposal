@@ -1,0 +1,587 @@
+{
+  "template_name": "TIPS 일반트랙 연구개발계획서 본문1",
+  "organization": "중소벤처기업부 / TIPS 운영사",
+  "year": 2026,
+  "source_file": "붙임2.+2026년+팁스TIPS+총괄+운영지침+1차+개정안+별지서식.hwpx",
+  "track": "일반트랙",
+  "form_id": "별지 제3호(3-1)",
+  "table_range": {"start": 25, "end": 79},
+  "tables": {
+    "T25": {
+      "name": "표지",
+      "table_index": 25,
+      "rows": 1, "cols": 1,
+      "editable": false,
+      "description": "팁스(TIPS) 창업기업 연구개발계획서 본문1 – 팁스R&D(일반트랙)"
+    },
+    "T26": {
+      "name": "필요성",
+      "table_index": 26,
+      "rows": 2, "cols": 2,
+      "editable": true,
+      "section_type": "narrative",
+      "fields": {
+        "본문": {"row": 0, "col": 1, "note": "연구개발과제의 필요성 서술"}
+      },
+      "guide_row": 1,
+      "guide_text": "국내외 현황 및 문제점과 전망, 국내 연구개발의 필요성, 정부 정책과의 연관성",
+      "writing_strategy": {
+        "approach": "Top-Down",
+        "structure": "거시 트렌드 → 구체 문제 → 기존 솔루션 한계 → 시장의 빈틈",
+        "required": ["수치 데이터", "그래프/도표", "시장 규모", "정책 연관성"],
+        "evaluation_item": "문제인식"
+      }
+    },
+    "T27": {
+      "name": "해결방안",
+      "table_index": 27,
+      "rows": 2, "cols": 2,
+      "editable": true,
+      "section_type": "narrative",
+      "fields": {
+        "본문": {"row": 0, "col": 1, "note": "문제점에 대한 솔루션을 핵심적으로 제시"}
+      },
+      "guide_row": 1,
+      "writing_strategy": {
+        "structure": "핵심 솔루션 요약 → 기술 차별점 → 적용 시나리오",
+        "evaluation_item": "실현가능성"
+      }
+    },
+    "T28": {
+      "name": "연구개발내용",
+      "table_index": 28,
+      "rows": 2, "cols": 2,
+      "editable": true,
+      "section_type": "narrative",
+      "fields": {
+        "본문": {"row": 0, "col": 1, "note": "주요 핵심기술을 개발단계별 또는 주요 모듈별 순으로 세부 내용 기재"}
+      },
+      "guide_row": 1,
+      "writing_strategy": {
+        "structure": "시스템 아키텍처 → 핵심 알고리즘 플로우 → 모듈별 개발 내용 → TRL 현재/목표",
+        "required": ["시스템 아키텍처 다이어그램", "알고리즘 플로우차트", "TRL 수준"],
+        "evaluation_item": "실현가능성"
+      }
+    },
+    "T29": {
+      "name": "결과물의_성능지표",
+      "table_index": 29,
+      "rows": 6, "cols": 7,
+      "editable": true,
+      "header_rows": [0, 1],
+      "expandable": true,
+      "columns": ["평가항목(주요 성능)", "단위", "비중(%)", "세계최고수준(보유국/보유기관)", "연구개발 전 국내 수준", "목표 설정 근거", "연구개발 목표치"],
+      "note": "비중 합계 100%. 세계최고 대비 60-80% 목표가 권장 구간. 100% 초과 목표 금지",
+      "writing_strategy": {
+        "rules": [
+          "측정 가능한 정량 수치만 사용",
+          "세계최고수준은 논문/특허/제품 스펙 근거 명시",
+          "목표치는 달성 가능성 80% 이상 기준으로 설정",
+          "중간점검(1년차 60%) 마일스톤 병기 권장"
+        ],
+        "evaluation_item": "실현가능성"
+      }
+    },
+    "T30": {
+      "name": "성능지표_작성요령",
+      "table_index": 30,
+      "editable": false,
+      "guide": true
+    },
+    "T31": {
+      "name": "평가방법",
+      "table_index": 31,
+      "rows": 5, "cols": 4,
+      "editable": true,
+      "header_row": 0,
+      "expandable": true,
+      "columns": ["순서", "평가항목(성능지표)", "평가방법", "평가환경"],
+      "note": "신뢰도 순서: 공인시험기관(KTL/KCL/KTC) > 고객사 PoC > 자체 평가. 자체 평가 시 환경/도구/절차 구체 명시 필수"
+    },
+    "T32": {
+      "name": "평가방법_작성요령",
+      "table_index": 32,
+      "editable": false,
+      "guide": true
+    },
+    "T33": {
+      "name": "지식재산권현황",
+      "table_index": 33,
+      "rows": 5, "cols": 8,
+      "editable": true,
+      "header_row": 0,
+      "expandable": true,
+      "columns": ["순번", "구분", "지식재산권출원인", "출원국", "진행상황", "출원 및 등록번호", "지식재산권명", "비고"],
+      "note": "보유특허 + 경쟁사 특허 모두 기재. IP로 기술 해자 증명"
+    },
+    "T34": {
+      "name": "선행연구_작성요령",
+      "table_index": 34,
+      "editable": false,
+      "guide": true,
+      "section_type": "narrative",
+      "guide_text": "선행연구, 기술이전, 특허출원 등 기술개발 관련 준비 내용 서술"
+    },
+    "T35": {
+      "name": "표준화전략_작성요령",
+      "table_index": 35,
+      "editable": false,
+      "guide": true,
+      "section_type": "narrative",
+      "guide_text": "기술·제품 관련 국내외 표준화 전략 기재"
+    },
+    "T36": {
+      "name": "연구개발비중",
+      "table_index": 36,
+      "rows": 5, "cols": 3,
+      "editable": true,
+      "header_row": 0,
+      "columns": ["구분", "기관별 연구개발 내용", "연구개발 비중(%)"],
+      "fields": {
+        "주관기관_내용": {"row": 1, "col": 1},
+        "주관기관_비중": {"row": 1, "col": 2},
+        "위탁기관_내용": {"row": 2, "col": 1},
+        "위탁기관_비중": {"row": 2, "col": 2}
+      }
+    },
+    "T37": {
+      "name": "추진일정",
+      "table_index": 37,
+      "rows": 16, "cols": 16,
+      "editable": true,
+      "header_rows": [0, 1],
+      "expandable": true,
+      "columns": ["차수", "세부 추진내용", "수행기관", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "비고"],
+      "note": "1차년도(R2~R7) + 2차년도(R8~R13). 해당 월에 ● 표시. 6개월 단위 마일스톤 필수"
+    },
+    "T38": {
+      "name": "경쟁사현황",
+      "table_index": 38,
+      "rows": 6, "cols": 4,
+      "editable": true,
+      "header_row": 0,
+      "expandable": true,
+      "columns": ["경쟁사명", "제품명", "판매가격(천원)", "연 판매액(천원)"],
+      "writing_strategy": {
+        "note": "기능 비교표로 차별점 명확히. 경쟁사 나열이 아니라 우위 증명",
+        "evaluation_item": "성장전략"
+      }
+    },
+    "T39": {
+      "name": "시장현황_작성요령",
+      "table_index": 39,
+      "editable": false,
+      "guide": true,
+      "section_type": "narrative",
+      "guide_text": "국내외 시장규모, 특성, 시장점유율 등 객관적 산출근거 바탕으로 목표시장현황 서술"
+    },
+    "T40": {
+      "name": "사업화추진일정",
+      "table_index": 40,
+      "rows": 6, "cols": 3,
+      "editable": true,
+      "header_row": 0,
+      "expandable": true,
+      "columns": ["추진기간", "사업추진 내용(과업)", "비고"]
+    },
+    "T41": {
+      "name": "시장진입전략_작성요령",
+      "table_index": 41,
+      "editable": false,
+      "guide": true,
+      "section_type": "narrative",
+      "guide_text": "시장 및 경쟁사 현황 분석결과를 토대로 시장진입 전략 상세 서술"
+    },
+    "T42": {
+      "name": "글로벌진출현황",
+      "table_index": 42,
+      "rows": 3, "cols": 6,
+      "editable": true,
+      "header_row": 0,
+      "columns": ["구분", "현지 창업", "수출", "현지매출", "해외투자유치", "기타"],
+      "fields": {
+        "현황": {"row": 1},
+        "목표": {"row": 2}
+      }
+    },
+    "T43": {
+      "name": "글로벌추진일정",
+      "table_index": 43,
+      "rows": 4, "cols": 3,
+      "editable": true,
+      "header_row": 0,
+      "expandable": true,
+      "columns": ["추진기간", "사업추진 내용(과업)", "비고"]
+    },
+    "T44": {
+      "name": "글로벌진출_작성요령",
+      "table_index": 44,
+      "editable": false,
+      "guide": true
+    },
+    "T45": {
+      "name": "운영사보육전략_작성요령",
+      "table_index": 45,
+      "editable": false,
+      "guide": true,
+      "section_type": "narrative",
+      "guide_text": "창업기업 특성에 따른 운영사 지원계획 및 보육 전략 상세 기재"
+    },
+    "T46": {
+      "name": "고용현황",
+      "table_index": 46,
+      "rows": 3, "cols": 6,
+      "editable": true,
+      "header_row": 0,
+      "columns": ["구분", "2025년", "2026년", "2027년", "2028년(개발종료 후 1년)", "2029년(개발종료 후 2년)"],
+      "fields": {
+        "신규고용": {"row": 1},
+        "상시고용": {"row": 2}
+      }
+    },
+    "T47": {
+      "name": "고용계획_작성요령",
+      "table_index": 47,
+      "editable": false,
+      "guide": true
+    },
+    "T48": {
+      "name": "사업화성과지표",
+      "table_index": 48,
+      "rows": 4, "cols": 8,
+      "editable": true,
+      "header_row": 0,
+      "columns": ["사업화 성과", "세부 성과지표", "개발종료해당년", "개발종료후1년", "개발종료후2년", "개발종료후3년", "개발종료후4년", "개발종료후5년"],
+      "note": "최종평가 및 경상기술료 산정 근거. TAM/SAM/SOM 기반 산출근거 필수"
+    },
+    "T49": {
+      "name": "사업화성과_작성요령",
+      "table_index": 49,
+      "editable": false,
+      "guide": true
+    },
+    "T50": {
+      "name": "매출산정근거",
+      "table_index": 50,
+      "rows": 3, "cols": 4,
+      "editable": true,
+      "header_row": 0,
+      "columns": ["사업화 성과", "세부 성과지표", "산정근거", "참고자료명"]
+    },
+    "T51": {
+      "name": "매출산정_작성요령",
+      "table_index": 51,
+      "editable": false,
+      "guide": true
+    },
+    "T52": {
+      "name": "팀구성_작성요령",
+      "table_index": 52,
+      "editable": false,
+      "guide": true,
+      "section_type": "narrative",
+      "guide_text": "창업기업 구성원의 이력, 경험, 전문성. CTO/CSO 역할 분담, 융합형 연계협력 방안"
+    },
+    "T53": {
+      "name": "안전보안_작성요령",
+      "table_index": 53,
+      "editable": false,
+      "guide": true,
+      "section_type": "narrative"
+    },
+    "T54": {
+      "name": "부록_표지",
+      "table_index": 54,
+      "rows": 1, "cols": 1,
+      "editable": false,
+      "description": "과제요약 및 연구개발비소요명세 표지"
+    },
+    "T55": {
+      "name": "연구원이력",
+      "table_index": 55,
+      "rows": 28, "cols": 6,
+      "editable": true,
+      "header_rows": [0, 1, 2],
+      "expandable": true,
+      "description": "참여연구원 학력 및 경력사항"
+    },
+    "T56": {
+      "name": "연구원이력_작성요령",
+      "table_index": 56,
+      "editable": false,
+      "guide": true
+    },
+    "T57": {
+      "name": "일반현황",
+      "table_index": 57,
+      "rows": 7, "cols": 4,
+      "editable": true,
+      "fields": {
+        "총_연구개발기간": {"row": 1, "col": 1},
+        "설립년월일": {"row": 2, "col": 1},
+        "상시근로자수": {"row": 2, "col": 3},
+        "사업자등록번호": {"row": 3, "col": 1},
+        "주소": {"row": 3, "col": 3}
+      }
+    },
+    "T58": {
+      "name": "재무현황",
+      "table_index": 58,
+      "rows": 11, "cols": 4,
+      "editable": true,
+      "fields": {
+        "매출액": {"row": 1, "col": 1},
+        "자본금": {"row": 1, "col": 3},
+        "주요매출품목": {"row": 2, "col": 1},
+        "수출액": {"row": 2, "col": 3}
+      }
+    },
+    "T59": {
+      "name": "참여연구원명단",
+      "table_index": 59,
+      "rows": 7, "cols": 12,
+      "editable": true,
+      "header_rows": [0, 1],
+      "expandable": true,
+      "columns": ["소속기관", "성명", "직위", "생년월일", "학교", "전공", "학위", "주요경력", "신규채용여부", "청년인력여부", "본사업인건비계상률(%)", "정부과제총인건비계상률(%)"]
+    },
+    "T60": {
+      "name": "위탁기관현황",
+      "table_index": 60,
+      "rows": 2, "cols": 5,
+      "editable": true,
+      "header_row": 0,
+      "columns": ["기관명", "사업자번호", "연구책임자", "직위", "연락처"]
+    },
+    "T61": {
+      "name": "시설장비현황",
+      "table_index": 61,
+      "rows": 9, "cols": 8,
+      "editable": true,
+      "header_rows": [0, 1],
+      "expandable": true,
+      "columns": ["구분", "시설및장비명", "규격", "구입가격(백만원)", "구입년도", "용도", "보유기관"]
+    },
+    "T62": {
+      "name": "연구개발비총괄",
+      "table_index": 62,
+      "rows": 11, "cols": 8,
+      "editable": true,
+      "header_rows": [0, 1, 2],
+      "description": "연구개발비 총괄(정부지원+기관부담 현금/현물+투자금)"
+    },
+    "T63": {
+      "name": "연구개발비총괄상세",
+      "table_index": 63,
+      "rows": 16, "cols": 10,
+      "editable": true,
+      "header_rows": [0, 1],
+      "description": "총괄 연구개발비 비목별 상세 (인건비, 직접비, 간접비)"
+    },
+    "T64": {
+      "name": "연구개발비연차별",
+      "table_index": 64,
+      "rows": 44, "cols": 10,
+      "editable": true,
+      "header_rows": [0, 1],
+      "description": "1차년도 + 2차년도 연구개발비 비목별 상세"
+    },
+    "T65": {
+      "name": "연구개발비산출근거",
+      "table_index": 65,
+      "rows": 41, "cols": 9,
+      "editable": true,
+      "header_rows": [0, 1],
+      "description": "비목별 산출내역 및 산출근거",
+      "note": "'1식' 산출근거 금지. 공수(인원x기간x단가) 기반 작성 필수"
+    },
+    "T66": {
+      "name": "시설장비구축계획_1차",
+      "table_index": 66,
+      "rows": 8, "cols": 8,
+      "editable": true,
+      "header_rows": [0, 1],
+      "columns": ["구축연도", "연구시설·장비명", "구축방식", "사용용도(규격)", "수량", "구축비용(천원)", "구축기간(설치일)", "설치장소"]
+    },
+    "T67": {
+      "name": "시설장비운영계획_1차",
+      "table_index": 67,
+      "rows": 6, "cols": 10,
+      "editable": true,
+      "header_rows": [0, 1, 2]
+    },
+    "T68": {
+      "name": "시설장비구축계획_2차",
+      "table_index": 68,
+      "rows": 8, "cols": 8,
+      "editable": true,
+      "header_rows": [0, 1]
+    },
+    "T69": {
+      "name": "시설장비운영계획_2차",
+      "table_index": 69,
+      "rows": 6, "cols": 10,
+      "editable": true,
+      "header_rows": [0, 1, 2]
+    },
+    "T70": {
+      "name": "국가RD과제내역확인서",
+      "table_index": 70,
+      "rows": 13, "cols": 7,
+      "editable": true,
+      "description": "국가연구개발과제 신청 및 수행 등 내역 확인서"
+    },
+    "T71": {
+      "name": "국가RD과제내역",
+      "table_index": 71,
+      "rows": 10, "cols": 7,
+      "editable": true,
+      "header_rows": [0, 1],
+      "expandable": true,
+      "columns": ["과제번호", "연구개발과제명", "주관연구개발기관명", "연구개발기간", "수행내용", "중앙행정기관(전문기관)", "비고"]
+    },
+    "T72": {
+      "name": "연구실운영비계획",
+      "table_index": 72,
+      "rows": 36, "cols": 18,
+      "editable": true,
+      "description": "영리기관의 연구실운영비 활용‧관리 계획"
+    },
+    "T73": {
+      "name": "보안등급자체점검",
+      "table_index": 73,
+      "rows": 16, "cols": 11,
+      "editable": true,
+      "description": "신청과제의 보안등급 자체점검 결과 및 보안과제 지정시 의무 확인서"
+    },
+    "T74": {
+      "name": "보안등급점검표_wrapper",
+      "table_index": 74,
+      "editable": false,
+      "has_nested": true
+    },
+    "T75": {
+      "name": "보안과제정보",
+      "table_index": 75,
+      "rows": 5, "cols": 4,
+      "editable": true
+    },
+    "T76": {
+      "name": "보안등급심사",
+      "table_index": 76,
+      "rows": 9, "cols": 4,
+      "editable": true,
+      "header_rows": [0, 1]
+    },
+    "T77": {
+      "name": "보안등급결과",
+      "table_index": 77,
+      "rows": 1, "cols": 1,
+      "editable": true
+    },
+    "T78": {
+      "name": "보안서명란",
+      "table_index": 78,
+      "rows": 3, "cols": 4,
+      "editable": true
+    },
+    "T79": {
+      "name": "보안대책",
+      "table_index": 79,
+      "editable": false
+    }
+  },
+  "guide_tables": [30, 32, 34, 35, 39, 41, 44, 45, 47, 49, 51, 52, 53, 56],
+  "narrative_sections": [
+    {"table": "T26", "title": "연구개발과제의 필요성", "evaluation_item": "문제인식", "weight_pct": 10},
+    {"table": "T27", "title": "해결방안", "evaluation_item": "실현가능성", "weight_pct": 5},
+    {"table": "T28", "title": "연구개발 목표 및 내용", "evaluation_item": "실현가능성", "weight_pct": 15},
+    {"table": "T34", "title": "연구개발 현황 (선행연구)", "evaluation_item": "실현가능성", "weight_pct": 10},
+    {"table": "T35", "title": "표준화 전략", "evaluation_item": "성장전략", "weight_pct": 3},
+    {"table": "T39", "title": "시장현황 및 목표시장", "evaluation_item": "성장전략", "weight_pct": 7},
+    {"table": "T41", "title": "시장진입 전략", "evaluation_item": "성장전략", "weight_pct": 7},
+    {"table": "T44", "title": "글로벌 진출 전략", "evaluation_item": "성장전략", "weight_pct": 5},
+    {"table": "T45", "title": "운영사 보육 전략", "evaluation_item": "팀구성", "weight_pct": 3},
+    {"table": "T47", "title": "고용 계획", "evaluation_item": "성장전략", "weight_pct": 3},
+    {"table": "T52", "title": "창업기업 소개 (팀 구성)", "evaluation_item": "팀구성", "weight_pct": 10},
+    {"table": "T53", "title": "안전 및 보안조치 이행계획", "evaluation_item": null, "weight_pct": 2}
+  ],
+  "writing_order": [
+    {"step": 1, "name": "기업/재무 기본정보", "tables": ["T57", "T58", "T59", "T60"], "priority": "필수"},
+    {"step": 2, "name": "필요성 서술 (문제인식)", "tables": ["T26"], "priority": "필수", "note": "Top-Down + 수치, 전체의 10%"},
+    {"step": 3, "name": "해결방안 서술", "tables": ["T27"], "priority": "필수"},
+    {"step": 4, "name": "연구개발 내용 서술 + 성능지표", "tables": ["T28", "T29", "T31"], "priority": "필수", "note": "아키텍처 다이어그램 + TRL 필수"},
+    {"step": 5, "name": "지식재산권 + 선행연구", "tables": ["T33", "T34"], "priority": "필수"},
+    {"step": 6, "name": "추진일정 + 연구개발비중", "tables": ["T36", "T37"], "priority": "필수", "note": "6개월 단위 마일스톤"},
+    {"step": 7, "name": "경쟁사 + 시장현황 + 사업화전략", "tables": ["T38", "T39", "T40", "T41"], "priority": "필수", "note": "경쟁사 비교표 + 매출산정근거"},
+    {"step": 8, "name": "글로벌 전략", "tables": ["T42", "T43", "T44"], "priority": "필수"},
+    {"step": 9, "name": "팀 구성 + 운영사 보육 + 고용 + 사업화성과", "tables": ["T45", "T46", "T48", "T50", "T52"], "priority": "필수"},
+    {"step": 10, "name": "안전보안 + 표준화", "tables": ["T35", "T53"], "priority": "필수"},
+    {"step": 11, "name": "예산 편성", "tables": ["T62", "T63", "T64", "T65"], "priority": "필수", "note": "인건비 단가 기준 준수, '1식' 금지"},
+    {"step": 12, "name": "시설장비 + 국가R&D내역 + 연구실운영비", "tables": ["T61", "T66", "T67", "T68", "T69", "T70", "T71", "T72"], "priority": "필수"},
+    {"step": 13, "name": "보안등급 점검", "tables": ["T73", "T75", "T76", "T77", "T78"], "priority": "필수"},
+    {"step": 14, "name": "작성요령 삭제", "tables": ["T30", "T32", "T34", "T35", "T39", "T41", "T44", "T45", "T47", "T49", "T51", "T52", "T53", "T56"], "priority": "필수"}
+  ],
+  "content_balance": {
+    "기술_영역_40pct": ["T26", "T27", "T28", "T29", "T31", "T33", "T34", "T35", "T36", "T37"],
+    "사업화_영역_30pct": ["T38", "T39", "T40", "T41", "T42", "T43", "T44", "T48", "T50"],
+    "팀_실적_영역_30pct": ["T45", "T46", "T47", "T52", "T55", "T57", "T58", "T59"],
+    "경고_기술50초과": "기술 영역이 전체의 50%를 초과하면 '학술 논문'으로 판단될 위험",
+    "경고_사업화15미만": "사업화 영역이 전체의 15% 미만이면 'R&D 의지 부족'으로 판단될 위험"
+  },
+  "budget_rules": {
+    "정부출연금_한도": 800000000,
+    "정부출연금_한도_설명": "2026년 일반트랙 최대 8억원 (5억→8억 증액)",
+    "민간부담금": {
+      "현금_최소": "정부출연금의 10% 이상",
+      "현물_허용": true,
+      "현금비율_권장": "60% 이상 (사업 의지 바로미터)",
+      "선투자금포함": "운영사 선투자금(수도권 2억+, 비수도권 1억+)이 민간부담금 현금에 포함"
+    },
+    "비목": {
+      "인건비": {
+        "한도": "인건비계상률 100% 이내",
+        "산정기준": "실제 지급액과 고시 단가 중 낮은 금액 기준",
+        "단가_2026": {
+          "책임연구원_월": 3783728,
+          "연구원_월": 2901312,
+          "연구보조원_월": 1939429,
+          "보조원_월": 1454621
+        },
+        "연구수당": "인건비의 20% 이내"
+      },
+      "직접비": {
+        "연구시설장비비": "구입/설치비, 임차비, 운영/유지비",
+        "연구재료비": "시약/재료 구입비, 관리비, 제작비",
+        "위탁연구개발비": {
+          "한도": "직접비의 40% 이내",
+          "대상": "위탁기관 지급 비용"
+        },
+        "연구활동비": {
+          "외부전문기술활용비": "직접비의 40% 이내",
+          "지식재산활동비": "특허출원/등록 비용",
+          "소프트웨어비": "전문 S/W 구입/임차",
+          "회의비": "과제 관련 회의 비용",
+          "출장비": "국내외 출장 비용",
+          "연구실운영비": "영리기관 연구실 운영 비용"
+        }
+      },
+      "간접비": {
+        "한도": "직접비의 10% 이내 (영리기관)",
+        "비영리기관": "고시비율 이내"
+      }
+    },
+    "산출근거_규칙": {
+      "1식_금지": "'1식' 단위 산출근거는 감점. 반드시 공수(인원x기간x단가) 기반 작성",
+      "나쁜예": "AI 엔진 개발 1식 = 50,000천원",
+      "좋은예": "AI 엔진 고도화 용역: 연구원 2인 × 6개월 × 월 2,901,312원 = 34,816천원",
+      "인건비_표현": "내부 인건비처럼 보이는 표현 지양 → 외주 용역 성격 명확히"
+    },
+    "8억_규모_기대치": {
+      "연구원_투입": "3-5명 풀타임 2년",
+      "논문_산출": "2편 이상",
+      "특허_산출": "3건 이상",
+      "기술적_난제": "쉬운 개발이면 8억이 필요한 이유를 설명할 수 없음"
+    }
+  }
+}
