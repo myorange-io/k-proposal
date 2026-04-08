@@ -1,114 +1,134 @@
 {
-  "_comment": "TIPS 일반트랙 연구개발계획서 본문1 서술형 본문 템플릿. 서술형 테이블은 R0의 c1(빈칸)에 본문을 넣는다. R1(작성요령 안내문)은 건드리지 않는다.",
-  "_fill_rule": "모든 서술형 테이블은 동일 구조: R0 c0='작성요령'(라벨), R0 c1=빈칸(✎ 여기에 작성). R1=안내문(수정금지). fill 대상은 항상 row=0, col=1.",
+  "_comment": "TIPS 일반트랙 연구개발계획서 본문1 서술형 본문 템플릿.",
+  "_fill_method": "서술형 내용은 테이블 셀이 아니라 섹션 제목 뒤의 ◦/- 단락(paragraph)에 채운다. header_keyword로 섹션 제목 단락을 찾고, 그 뒤의 ◦/- 단락 텍스트를 pairs로 교체한다. 작성요령 테이블은 별도 삭제.",
   "sections": [
     {
-      "title": "연구개발과제의 필요성",
-      "table_index": 5,
-      "fill_row": 0,
-      "fill_col": 1,
+      "header_keyword": "시장현황 및 문제점",
       "evaluation_item": "문제인식",
       "content_area": "기술",
-      "writing_guide": "Top-Down(거시→미시), 수치+그래프 필수, 시장의 빈틈"
+      "writing_guide": "Top-Down(거시→미시), 수치+그래프 필수, 시장의 빈틈. 출처 URL 인라인 필수.",
+      "pairs": [
+        ["   ◦ (국내외 현황 — 거시 트렌드 + 시장 규모 데이터 + 출처 URL)", null],
+        ["   - (구체적 수치와 출처)", null],
+        ["   - (문제점 — 기존 솔루션의 한계, Pain Point 수치화)", null]
+      ]
     },
     {
-      "title": "해결방안",
-      "table_index": 6,
-      "fill_row": 0,
-      "fill_col": 1,
+      "header_keyword": "연구개발 요약",
       "evaluation_item": "실현가능성",
       "content_area": "기술",
-      "writing_guide": "핵심 솔루션 요약 → 기술 차별점 → 적용 시나리오"
+      "writing_guide": "핵심 솔루션 요약 → 기술 차별점 → 적용 시나리오",
+      "pairs": [
+        ["   ◦ (핵심 솔루션 — 기술명 + 한줄 설명)", null],
+        ["   - (기존 대비 차별점 요약)", null],
+        ["   - (기술 적용 시나리오)", null]
+      ]
     },
     {
-      "title": "연구개발 목표 및 내용",
-      "table_index": 7,
-      "fill_row": 0,
-      "fill_col": 1,
+      "header_keyword": "연구개발 내용 및 목표",
       "evaluation_item": "실현가능성",
       "content_area": "기술",
-      "writing_guide": "시스템 아키텍처 → 모듈별 개발내용 → TRL 현재/목표"
+      "writing_guide": "시스템 아키텍처 → 모듈별 개발내용 → TRL 현재/목표. 아키텍처 다이어그램 이미지 삽입.",
+      "pairs": [
+        ["   ◦ (TRL 현재 수준 → 목표 수준)", null],
+        ["   - (모듈1 — 개발단계별 세부 내용 + 기술적 난제)", null],
+        ["   - (모듈2 — 개발단계별 세부 내용 + 기술적 난제)", null]
+      ]
     },
     {
-      "title": "연구개발 현황 (선행연구)",
-      "table_index": 13,
-      "fill_row": 0,
-      "fill_col": 1,
+      "header_keyword": "연구개발 현황",
       "evaluation_item": "실현가능성",
       "content_area": "기술",
-      "writing_guide": "선행연구, 기술이전, 특허출원, MVP/프로토타입, 확보 데이터"
+      "writing_guide": "선행연구, 기술이전, 특허출원, MVP/프로토타입, 확보 데이터, 경쟁사 기술 분석",
+      "pairs": [
+        ["   ◦ (기보유 기술 및 선행 개발 현황)", null],
+        ["   - (MVP/프로토타입 현황, 확보 데이터)", null],
+        ["   - (출원 특허 기술적 범위, 경쟁사 기술 비교)", null]
+      ]
     },
     {
-      "title": "표준화 전략",
-      "table_index": 14,
-      "fill_row": 0,
-      "fill_col": 1,
+      "header_keyword": "표준화 전략",
       "evaluation_item": "성장전략",
       "content_area": "사업화",
-      "writing_guide": "API 공개, 표준화 기관 활동, 사실상 표준 전략"
+      "writing_guide": "API 공개, 표준화 기관 활동, 사실상 표준 전략",
+      "pairs": [
+        ["   ◦ (표준화 추진 방향)", null],
+        ["   - (관련 표준 호환, 표준화 기관 참여 계획)", null],
+        ["   - (데이터 교환 표준 적용)", null]
+      ]
     },
     {
-      "title": "시장현황 및 목표시장",
-      "table_index": 18,
-      "fill_row": 0,
-      "fill_col": 1,
+      "header_keyword": "목표시장 및 경쟁사",
       "evaluation_item": "성장전략",
       "content_area": "사업화",
-      "writing_guide": "TAM/SAM/SOM 기반 시장규모, 시장점유율, 객관적 산출근거"
+      "writing_guide": "TAM/SAM/SOM 기반 시장규모 + 출처 URL, 시장점유율, 객관적 산출근거",
+      "pairs": [
+        ["   ◦ (TAM — 전체 시장 규모 + 출처 URL)", null],
+        ["   - (SAM — 유효 시장 규모 + SOM — 획득 가능 시장)", null],
+        ["   - (시장 성장 촉매, 정책 변화)", null]
+      ]
     },
     {
-      "title": "시장진입 전략",
-      "table_index": 20,
-      "fill_row": 0,
-      "fill_col": 1,
+      "header_keyword": "사업화 계획",
       "evaluation_item": "성장전략",
       "content_area": "사업화",
-      "writing_guide": "BM + 가격정책 + 초기고객확보 + 후속투자시나리오"
+      "writing_guide": "BM + 가격정책 + 초기고객확보 + 후속투자시나리오(TIPS→Post-TIPS→시리즈A)",
+      "pairs": [
+        ["   ◦ (단계별 시장 진입 로드맵)", null],
+        ["   - (비즈니스 모델 — 누가 돈을 내는가, 가격정책)", null],
+        ["   - (후속 투자 시나리오: TIPS R&D → Post-TIPS → 시리즈A)", null]
+      ]
     },
     {
-      "title": "글로벌 진출 전략",
-      "table_index": 23,
-      "fill_row": 0,
-      "fill_col": 1,
+      "header_keyword": "글로벌 진출",
       "evaluation_item": "성장전략",
       "content_area": "사업화",
-      "writing_guide": "진출 권역, 희망 진출 국가, 현지화 전략"
+      "writing_guide": "진출 권역, 희망 진출 국가, 현지화 전략, 채널",
+      "pairs": [
+        ["   ◦ (글로벌 진출 전략 — 권역, 국가, 채널)", null],
+        ["   - (제품 현지화, 글로벌 가격 정책)", null]
+      ]
     },
     {
-      "title": "운영사 보육 전략",
-      "table_index": 24,
-      "fill_row": 0,
-      "fill_col": 1,
+      "header_keyword": "운영사 지원계획",
       "evaluation_item": "팀구성",
       "content_area": "팀",
-      "writing_guide": "운영사의 전담멘토, 보육공간, 사업화 지원 구체 계획"
+      "writing_guide": "운영사의 전담멘토, 보육공간, 사업화 지원 구체 계획",
+      "pairs": [
+        ["   ◦ (운영사 보육 전략 — 멘토링, 네트워크, 후속투자)", null],
+        ["   - (구체적 지원 내용)", null]
+      ]
     },
     {
-      "title": "고용 계획",
-      "table_index": 26,
-      "fill_row": 0,
-      "fill_col": 1,
+      "header_keyword": "고용창출 및 기대효과",
       "evaluation_item": "성장전략",
       "content_area": "팀",
-      "writing_guide": "현재 고용현황, 향후 고용 유지/창출 계획, 인력 교육"
+      "writing_guide": "현재 고용현황, 향후 고용 유지/창출 계획, 인력 교육",
+      "pairs": [
+        ["   ◦ (현재 고용 현황 + 향후 채용 계획)", null],
+        ["   - (R&D 인력 교육, 인센티브 제도)", null]
+      ]
     },
     {
-      "title": "창업기업 소개 (팀 구성)",
-      "table_index": 31,
-      "fill_row": 0,
-      "fill_col": 1,
+      "header_keyword": "창업기업 소개",
       "evaluation_item": "팀구성",
       "content_area": "팀",
-      "writing_guide": "대표/CTO/CSO 이력+전문성, 역할 분담, 팀 시너지"
+      "writing_guide": "대표/CTO/CSO 이력+전문성, 역할 분담, 팀 시너지",
+      "pairs": [
+        ["   ◦ (핵심 인력 구성 — 역할 + 경력)", null],
+        ["   - (CEO — 핵심 경력 + 역할)", null],
+        ["   - (CTO/CSO — 핵심 경력 + 역할, 팀 시너지)", null]
+      ]
     },
     {
-      "title": "안전 및 보안조치 이행계획",
-      "table_index": 32,
-      "fill_row": 0,
-      "fill_col": 1,
+      "header_keyword": "안전조치 이행계획",
       "evaluation_item": null,
       "content_area": "기타",
-      "writing_guide": "안전책임자 지정, 안전교육, 보안조치"
+      "writing_guide": "안전책임자 지정, 안전교육, 보안조치",
+      "pairs": [
+        ["   ◦ (데이터 보안 + 연구실 안전)", null],
+        ["   - (보안 조치 상세)", null]
+      ]
     }
   ]
 }

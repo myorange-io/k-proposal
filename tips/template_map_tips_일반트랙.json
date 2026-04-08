@@ -44,50 +44,25 @@
       "description": "팁스(TIPS) 창업기업 연구개발계획서 본문1 – 팁스R&D(일반트랙)"
     },
     "T5": {
-      "name": "필요성",
+      "name": "필요성_작성요령",
       "table_index": 5,
-      "rows": 2, "cols": 2,
-      "editable": true,
-      "section_type": "narrative",
-      "fill_target": {"row": 0, "col": 1},
-      "_structure": "R0: c0='작성요령'(라벨), c1=빈칸(✎ 여기에 본문 작성). R1: 작성요령 안내문(건드리지 않음)",
-      "guide_row": 1,
-      "guide_text": "국내외 현황 및 문제점과 전망, 국내 연구개발의 필요성, 정부 정책과의 연관성",
-      "writing_strategy": {
-        "approach": "Top-Down",
-        "structure": "거시 트렌드 → 구체 문제 → 기존 솔루션 한계 → 시장의 빈틈",
-        "required": ["수치 데이터", "그래프/도표", "시장 규모", "정책 연관성"],
-        "evaluation_item": "문제인식"
-      }
+      "editable": false,
+      "guide": true,
+      "action": "제출 시 삭제. 내용은 이 테이블이 아니라 섹션 제목('시장현황 및 문제점') 뒤 ◦/- 단락에 작성"
     },
     "T6": {
-      "name": "해결방안",
+      "name": "해결방안_작성요령",
       "table_index": 6,
-      "rows": 2, "cols": 2,
-      "editable": true,
-      "section_type": "narrative",
-      "fill_target": {"row": 0, "col": 1},
-      "_structure": "R0: c0='작성요령'(라벨), c1=빈칸(✎ 여기에 본문 작성). R1: 작성요령 안내문",
-      "guide_row": 1,
-      "writing_strategy": {
-        "structure": "핵심 솔루션 요약 → 기술 차별점 → 적용 시나리오",
-        "evaluation_item": "실현가능성"
-      }
+      "editable": false,
+      "guide": true,
+      "action": "제출 시 삭제. 내용은 '연구개발 요약' 뒤 ◦/- 단락에 작성"
     },
     "T7": {
-      "name": "연구개발내용",
+      "name": "연구개발내용_작성요령",
       "table_index": 7,
-      "rows": 2, "cols": 2,
-      "editable": true,
-      "section_type": "narrative",
-      "fill_target": {"row": 0, "col": 1},
-      "_structure": "R0: c0='작성요령'(라벨), c1=빈칸(✎ 여기에 본문 작성). R1: 작성요령 안내문",
-      "guide_row": 1,
-      "writing_strategy": {
-        "structure": "시스템 아키텍처 → 핵심 알고리즘 → 모듈별 개발 내용 → TRL 현재/목표",
-        "required": ["시스템 아키텍처 다이어그램", "알고리즘 플로우차트", "TRL 수준"],
-        "evaluation_item": "실현가능성"
-      }
+      "editable": false,
+      "guide": true,
+      "action": "제출 시 삭제. 내용은 '연구개발 내용 및 목표' 뒤 ◦/- 단락에 작성"
     },
     "T8": {
       "name": "결과물의_성능지표",
@@ -136,22 +111,16 @@
     "T13": {
       "name": "선행연구_작성요령",
       "table_index": 13,
-      "editable": true,
-      "section_type": "narrative",
-      "fill_target": {"row": 0, "col": 1},
-      "_structure": "R0: c0='작성요령', c1=빈칸(✎ 여기에 서술). R1: 안내문",
-      "guide_row": 1,
-      "guide_text": "선행연구, 기술이전, 특허출원 등 기술개발 관련 준비 내용 서술"
+      "editable": false,
+      "guide": true,
+      "action": "제출 시 삭제. 내용은 '연구개발 현황' 뒤 ◦/- 단락에 작성"
     },
     "T14": {
       "name": "표준화전략_작성요령",
       "table_index": 14,
-      "editable": true,
-      "section_type": "narrative",
-      "fill_target": {"row": 0, "col": 1},
-      "_structure": "R0: c0='작성요령', c1=빈칸(✎ 여기에 서술). R1: 안내문",
-      "guide_row": 1,
-      "guide_text": "기술·제품 관련 국내외 표준화 전략 기재"
+      "editable": false,
+      "guide": true,
+      "action": "제출 시 삭제. 내용은 '표준화 전략' 뒤 ◦/- 단락에 작성"
     },
     "T15": {
       "name": "연구개발비중",
@@ -183,12 +152,9 @@
     "T18": {
       "name": "시장현황_작성요령",
       "table_index": 18,
-      "editable": true,
-      "section_type": "narrative",
-      "fill_target": {"row": 0, "col": 1},
-      "_structure": "R0: c0='작성요령', c1=빈칸(✎ 여기에 서술). R1: 안내문",
-      "guide_row": 1,
-      "guide_text": "국내외 시장규모, 특성, 시장점유율 등 객관적 산출근거 바탕으로 목표시장현황 서술"
+      "editable": false,
+      "guide": true,
+      "action": "제출 시 삭제. 내용은 '목표시장 및 경쟁사' 뒤 ◦/- 단락에 작성"
     },
     "T19": {
       "name": "사업화추진일정",
@@ -202,12 +168,9 @@
     "T20": {
       "name": "시장진입전략_작성요령",
       "table_index": 20,
-      "editable": true,
-      "section_type": "narrative",
-      "fill_target": {"row": 0, "col": 1},
-      "_structure": "R0: c0='작성요령', c1=빈칸(✎ 여기에 서술). R1: 안내문",
-      "guide_row": 1,
-      "guide_text": "시장 및 경쟁사 분석결과를 토대로 시장진입 전략 상세 서술"
+      "editable": false,
+      "guide": true,
+      "action": "제출 시 삭제. 내용은 '사업화 계획' 뒤 ◦/- 단락에 작성"
     },
     "T21": {
       "name": "글로벌진출현황",
@@ -229,20 +192,16 @@
     "T23": {
       "name": "글로벌진출_작성요령",
       "table_index": 23,
-      "editable": true,
-      "section_type": "narrative",
-      "fill_target": {"row": 0, "col": 1},
-      "_structure": "R0: c0='작성요령', c1=빈칸(✎). R1: 안내문",
-      "guide_row": 1
+      "editable": false,
+      "guide": true,
+      "action": "제출 시 삭제. 내용은 '글로벌 진출' 뒤 ◦/- 단락에 작성"
     },
     "T24": {
       "name": "운영사보육전략_작성요령",
       "table_index": 24,
-      "editable": true,
-      "section_type": "narrative",
-      "fill_target": {"row": 0, "col": 1},
-      "_structure": "R0: c0='작성요령', c1=빈칸(✎). R1: 안내문",
-      "guide_row": 1
+      "editable": false,
+      "guide": true,
+      "action": "제출 시 삭제. 내용은 '운영사 지원계획' 뒤 ◦/- 단락에 작성"
     },
     "T25": {
       "name": "고용현황",
@@ -255,11 +214,9 @@
     "T26": {
       "name": "고용계획_작성요령",
       "table_index": 26,
-      "editable": true,
-      "section_type": "narrative",
-      "fill_target": {"row": 0, "col": 1},
-      "_structure": "R0: c0='작성요령', c1=빈칸(✎). R1: 안내문",
-      "guide_row": 1
+      "editable": false,
+      "guide": true,
+      "action": "제출 시 삭제. 내용은 '고용창출 및 기대효과' 뒤 ◦/- 단락에 작성"
     },
     "T27": {
       "name": "사업화성과지표",
@@ -294,38 +251,36 @@
     "T31": {
       "name": "팀구성_작성요령",
       "table_index": 31,
-      "editable": true,
-      "section_type": "narrative",
-      "fill_target": {"row": 0, "col": 1},
-      "_structure": "R0: c0='작성요령', c1=빈칸(✎ 여기에 팀 소개 서술). R1: 안내문",
-      "guide_row": 1
+      "editable": false,
+      "guide": true,
+      "action": "제출 시 삭제. 내용은 '창업기업 소개' 뒤 ◦/- 단락에 작성"
     },
     "T32": {
       "name": "안전보안_작성요령",
       "table_index": 32,
-      "editable": true,
-      "section_type": "narrative",
-      "fill_target": {"row": 0, "col": 1},
-      "_structure": "R0: c0='작성요령', c1=빈칸(✎ 여기에 안전보안 서술). R1: 안내문",
-      "guide_row": 1
+      "editable": false,
+      "guide": true,
+      "action": "제출 시 삭제. 내용은 '안전조치 이행계획' 뒤 ◦/- 단락에 작성"
     }
   },
-  "guide_tables_to_delete": [1, 3, 9, 11, 28, 30],
+  "guide_tables_to_delete": [1, 3, 5, 6, 7, 9, 11, 13, 14, 18, 20, 23, 24, 26, 28, 30, 31, 32],
+  "_guide_tables_note": "작성요령 테이블은 전부 삭제. T5~T7, T13, T14, T18, T20, T23, T24, T26, T31, T32는 서술형 섹션의 작성요령 안내이므로 내용을 단락에 채운 후 삭제한다.",
   "narrative_sections": [
-    {"table_index": 5,  "title": "연구개발과제의 필요성", "fill_cell": [0, 1], "evaluation_item": "문제인식"},
-    {"table_index": 6,  "title": "해결방안", "fill_cell": [0, 1], "evaluation_item": "실현가능성"},
-    {"table_index": 7,  "title": "연구개발 목표 및 내용", "fill_cell": [0, 1], "evaluation_item": "실현가능성"},
-    {"table_index": 13, "title": "연구개발 현황 (선행연구)", "fill_cell": [0, 1], "evaluation_item": "실현가능성"},
-    {"table_index": 14, "title": "표준화 전략", "fill_cell": [0, 1], "evaluation_item": "성장전략"},
-    {"table_index": 18, "title": "시장현황 및 목표시장", "fill_cell": [0, 1], "evaluation_item": "성장전략"},
-    {"table_index": 20, "title": "시장진입 전략", "fill_cell": [0, 1], "evaluation_item": "성장전략"},
-    {"table_index": 23, "title": "글로벌 진출 전략", "fill_cell": [0, 1], "evaluation_item": "성장전략"},
-    {"table_index": 24, "title": "운영사 보육 전략", "fill_cell": [0, 1], "evaluation_item": "팀구성"},
-    {"table_index": 26, "title": "고용 계획", "fill_cell": [0, 1], "evaluation_item": "성장전략"},
-    {"table_index": 31, "title": "창업기업 소개 (팀 구성)", "fill_cell": [0, 1], "evaluation_item": "팀구성"},
-    {"table_index": 32, "title": "안전 및 보안조치 이행계획", "fill_cell": [0, 1], "evaluation_item": null}
+    {"header_keyword": "시장현황 및 문제점", "title": "시장현황 및 문제점", "guide_table": 5, "evaluation_item": "문제인식", "_para_idx": "67~104 (◦/- 단락)"},
+    {"header_keyword": "연구개발 요약", "title": "해결방안 (연구개발 요약)", "guide_table": 6, "evaluation_item": "실현가능성", "_para_idx": "108~(◦/- 단락)"},
+    {"header_keyword": "연구개발 내용 및 목표", "title": "연구개발 내용 및 목표", "guide_table": 7, "evaluation_item": "실현가능성", "_para_idx": "(◦/- 단락)"},
+    {"header_keyword": "연구개발 현황", "title": "연구개발 현황 (선행연구)", "guide_table": 13, "evaluation_item": "실현가능성", "_para_idx": "165~(◦/- 단락)"},
+    {"header_keyword": "표준화 전략", "title": "표준화 전략", "guide_table": 14, "evaluation_item": "성장전략", "_para_idx": "180~(◦/- 단락)"},
+    {"header_keyword": "목표시장 및 경쟁사", "title": "목표시장 및 경쟁사 현황", "guide_table": 18, "evaluation_item": "성장전략", "_para_idx": "216~(◦/- 단락)"},
+    {"header_keyword": "사업화 계획", "title": "사업화 계획 (시장진입 전략)", "guide_table": 20, "evaluation_item": "성장전략", "_para_idx": "235~(◦/- 단락)"},
+    {"header_keyword": "글로벌 진출", "title": "글로벌 진출 전략", "guide_table": 23, "evaluation_item": "성장전략"},
+    {"header_keyword": "운영사 지원계획", "title": "운영사 보육 전략", "guide_table": 24, "evaluation_item": "팀구성"},
+    {"header_keyword": "고용창출 및 기대효과", "title": "고용 계획", "guide_table": 26, "evaluation_item": "성장전략"},
+    {"header_keyword": "창업기업 소개", "title": "창업기업 소개 (팀 구성)", "guide_table": 31, "evaluation_item": "팀구성", "_para_idx": "328~(◦/- 단락)"},
+    {"header_keyword": "안전조치 이행계획", "title": "안전 및 보안조치", "guide_table": 32, "evaluation_item": null, "_para_idx": "339~(◦/- 단락)"}
   ],
-  "_narrative_fill_rule": "서술형 테이블(T5~T7, T13, T14, T18, T20, T23, T24, T26, T31, T32)은 모두 동일한 구조: R0의 c0='작성요령'(라벨), c1=빈칸(✎). 본문은 반드시 R0의 c1에만 넣는다. R1은 작성요령 안내문이므로 절대 수정하지 않는다. 제출 시 guide_tables_to_delete의 테이블만 삭제하고, 서술형 테이블의 R1(작성요령 행)은 삭제하되 R0(본문 행)은 유지한다.",
+  "_narrative_method": "서술형 내용은 build_hwpx.py Step 2(lxml 직접 조작)로 채운다. header_keyword로 섹션 제목 단락을 찾고, 그 뒤에 오는 ◦/- 단락의 텍스트를 교체한다. 작성요령 테이블(guide_table)은 별도 삭제한다.",
+  "_narrative_fill_rule": "서술형 내용은 테이블 셀이 아니라 **섹션 제목 단락 뒤의 ◦/- 단락(paragraph)**에 넣는다. 작성요령 테이블(T5~T7, T13, T14, T18, T20, T23, T24, T26, T31, T32)은 전부 삭제 대상이다. build_hwpx.py Step 2(lxml 텍스트 패턴 매칭)로 header_keyword를 찾고, 그 뒤의 ◦/- 단락에 내용을 채운다.",
   "writing_order": [
     {"step": 1, "name": "앞표지 기본정보", "tables": ["T0"], "priority": "필수"},
     {"step": 2, "name": "요약문", "tables": ["T2"], "priority": "필수", "note": "전체 완성 후 마지막에 작성"},
