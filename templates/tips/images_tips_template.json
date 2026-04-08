@@ -1,58 +1,52 @@
 {
-  "_comment": "TIPS 일반트랙 연구개발계획서 이미지 삽입 설정. 시스템 아키텍처, 플로우차트 등 기술 시각화 자료.",
+  "_comment": "TIPS 일반트랙 연구개발계획서 이미지 삽입 설정. 본문1 단독 양식(T0~T32) 기준.",
   "images": [
     {
       "name": "시스템_아키텍처",
       "filename": "system_architecture.png",
-      "after_table": 28,
+      "after_table": 7,
       "width_cm": 15,
-      "description": "전체 시스템 아키텍처 다이어그램 (모듈 구성, 데이터 흐름)",
-      "generation": "visual_gen.py 또는 mermaid",
+      "description": "전체 시스템 아키텍처 다이어그램",
       "required": true
     },
     {
       "name": "알고리즘_플로우차트",
       "filename": "algorithm_flow.png",
-      "after_table": 28,
+      "after_table": 7,
       "width_cm": 14,
       "description": "핵심 알고리즘 처리 플로우차트",
-      "generation": "visual_gen.py 또는 mermaid",
       "required": true
     },
     {
       "name": "시장규모_차트",
       "filename": "market_size.png",
-      "after_table": 26,
+      "after_table": 5,
       "width_cm": 13,
-      "description": "TAM/SAM/SOM 시장 규모 차트 또는 시장 성장 추이",
-      "generation": "matplotlib bar/line chart",
+      "description": "TAM/SAM/SOM 시장 규모 차트",
       "required": true
     },
     {
       "name": "경쟁사_비교표",
       "filename": "competitor_comparison.png",
-      "after_table": 38,
+      "after_table": 17,
       "width_cm": 15,
-      "description": "경쟁사 대비 기능/가격/성능 비교표 (radar chart 또는 table)",
-      "generation": "matplotlib radar chart",
+      "description": "경쟁사 대비 기능/가격/성능 비교",
       "required": true
     },
     {
       "name": "투자_로드맵",
       "filename": "investment_roadmap.png",
-      "after_table": 41,
+      "after_table": 20,
       "width_cm": 15,
-      "description": "TIPS R&D → Post-TIPS → 시리즈A 성장 사다리 시각화",
-      "generation": "visual_gen.py timeline",
+      "description": "TIPS R&D -> Post-TIPS -> 시리즈A 성장 사다리",
       "required": false
     },
     {
       "name": "TRL_진행도",
       "filename": "trl_progress.png",
-      "after_table": 28,
+      "after_table": 7,
       "width_cm": 12,
-      "description": "TRL 현재 수준 → 목표 수준 진행도 바 차트",
-      "generation": "matplotlib horizontal bar",
+      "description": "TRL 현재 수준 -> 목표 수준 진행도",
       "required": false
     }
   ]

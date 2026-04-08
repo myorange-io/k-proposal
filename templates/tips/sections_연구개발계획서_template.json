@@ -1,139 +1,114 @@
 {
-  "_comment": "TIPS 일반트랙 연구개발계획서 본문1 서술형 본문 템플릿. 서류평가 4대항목(문제인식/실현가능성/성장전략/팀구성)에 1:1 매칭. 기술40%/사업화30%/팀30% 비율 준수.",
+  "_comment": "TIPS 일반트랙 연구개발계획서 본문1 서술형 본문 템플릿. 서술형 테이블은 R0의 c1(빈칸)에 본문을 넣는다. R1(작성요령 안내문)은 건드리지 않는다.",
+  "_fill_rule": "모든 서술형 테이블은 동일 구조: R0 c0='작성요령'(라벨), R0 c1=빈칸(✎ 여기에 작성). R1=안내문(수정금지). fill 대상은 항상 row=0, col=1.",
   "sections": [
     {
-      "header_keyword": "연구개발과제의 필요성",
-      "table_index": 26,
+      "title": "연구개발과제의 필요성",
+      "table_index": 5,
+      "fill_row": 0,
+      "fill_col": 1,
       "evaluation_item": "문제인식",
       "content_area": "기술",
-      "writing_guide": "Top-Down(거시→미시), 수치+그래프 필수, 시장의 빈틈",
-      "pairs": [
-        ["   ◦ (국내외 현황 — 거시 트렌드 + 시장 규모 데이터)", "     - (구체적 수치와 출처)"],
-        ["   ◦ (문제점 — 기존 솔루션의 한계, Pain Point 수치화)", "     - (기존 방식의 비용/시간/품질 문제)"],
-        ["   ◦ (연구개발 필요성 — 왜 지금 이 R&D가 필요한가)", "     - (정책 연관성, 규제 변화, 기술 전환점)"]
-      ]
+      "writing_guide": "Top-Down(거시→미시), 수치+그래프 필수, 시장의 빈틈"
     },
     {
-      "header_keyword": "해결방안",
-      "table_index": 27,
+      "title": "해결방안",
+      "table_index": 6,
+      "fill_row": 0,
+      "fill_col": 1,
       "evaluation_item": "실현가능성",
       "content_area": "기술",
-      "writing_guide": "핵심 솔루션 요약 → 기술 차별점 → 적용 시나리오",
-      "pairs": [
-        ["   ◦ (핵심 솔루션 — 기술명 + 한줄 설명)", "     - (기존 대비 차별점 요약)"],
-        ["   ◦ (기술 적용 시나리오 — 사용자 관점)", "     - (구체적 사용 흐름)"]
-      ]
+      "writing_guide": "핵심 솔루션 요약 → 기술 차별점 → 적용 시나리오"
     },
     {
-      "header_keyword": "연구개발 목표 및 내용",
-      "table_index": 28,
+      "title": "연구개발 목표 및 내용",
+      "table_index": 7,
+      "fill_row": 0,
+      "fill_col": 1,
       "evaluation_item": "실현가능성",
       "content_area": "기술",
-      "writing_guide": "시스템 아키텍처 → 모듈별 개발내용 → TRL 현재/목표",
-      "pairs": [
-        ["   ◦ (시스템 아키텍처 — 전체 구조 설명)", "     - (모듈 구성 및 데이터 흐름)"],
-        ["   ◦ (핵심 기술 1 — 개발단계별 세부 내용)", "     - (기술적 난제 + 해결방안)"],
-        ["   ◦ (핵심 기술 2 — 개발단계별 세부 내용)", "     - (기술적 난제 + 해결방안)"],
-        ["   ◦ (TRL 현재 수준 → 목표 수준)", "     - (달성 근거 및 방법론)"]
-      ]
+      "writing_guide": "시스템 아키텍처 → 모듈별 개발내용 → TRL 현재/목표"
     },
     {
-      "header_keyword": "연구개발 현황",
-      "table_index": 34,
+      "title": "연구개발 현황 (선행연구)",
+      "table_index": 13,
+      "fill_row": 0,
+      "fill_col": 1,
       "evaluation_item": "실현가능성",
       "content_area": "기술",
-      "writing_guide": "선행연구, 기술이전, 특허출원, MVP/프로토타입, 확보 데이터",
-      "pairs": [
-        ["   ◦ (선행연구 — 기존 연구 성과)", "     - (논문/특허/기술이전 실적)"],
-        ["   ◦ (프로토타입/MVP — 현재 개발 현황)", "     - (확보 데이터, 성능 수준)"]
-      ]
+      "writing_guide": "선행연구, 기술이전, 특허출원, MVP/프로토타입, 확보 데이터"
     },
     {
-      "header_keyword": "표준화 전략",
-      "table_index": 35,
+      "title": "표준화 전략",
+      "table_index": 14,
+      "fill_row": 0,
+      "fill_col": 1,
       "evaluation_item": "성장전략",
       "content_area": "사업화",
-      "writing_guide": "API 공개, 표준화 기관 활동, 사실상 표준 전략",
-      "pairs": [
-        ["   ◦ (표준화 추진 방향)", "     - (관련 표준화 기관/프로젝트 그룹 참여 계획)"]
-      ]
+      "writing_guide": "API 공개, 표준화 기관 활동, 사실상 표준 전략"
     },
     {
-      "header_keyword": "시장현황 및 목표시장",
-      "table_index": 39,
+      "title": "시장현황 및 목표시장",
+      "table_index": 18,
+      "fill_row": 0,
+      "fill_col": 1,
       "evaluation_item": "성장전략",
       "content_area": "사업화",
-      "writing_guide": "TAM/SAM/SOM 기반 시장규모, 시장점유율, 객관적 산출근거",
-      "pairs": [
-        ["   ◦ (TAM — 전체 시장 규모 + 출처)", "     - (시장 성장률 및 전망)"],
-        ["   ◦ (SAM — 유효 시장 규모)", "     - (타겟 세그먼트 정의)"],
-        ["   ◦ (SOM — 획득 가능 시장)", "     - (초기 고객 확보 전략)"]
-      ]
+      "writing_guide": "TAM/SAM/SOM 기반 시장규모, 시장점유율, 객관적 산출근거"
     },
     {
-      "header_keyword": "시장진입 전략",
-      "table_index": 41,
+      "title": "시장진입 전략",
+      "table_index": 20,
+      "fill_row": 0,
+      "fill_col": 1,
       "evaluation_item": "성장전략",
       "content_area": "사업화",
-      "writing_guide": "BM + 가격정책 + 초기고객확보 + 후속투자시나리오",
-      "pairs": [
-        ["   ◦ (비즈니스 모델 — 누가 돈을 내는가)", "     - (가격정책, 과금 구조)"],
-        ["   ◦ (초기 고객 확보 전략)", "     - (PoC/파일럿 계획, 파트너십)"],
-        ["   ◦ (후속 투자 시나리오 — TIPS→Post-TIPS→시리즈A)", "     - (단계별 목표: TRL, 매출, 기업가치)"]
-      ]
+      "writing_guide": "BM + 가격정책 + 초기고객확보 + 후속투자시나리오"
     },
     {
-      "header_keyword": "글로벌 진출",
-      "table_index": 44,
+      "title": "글로벌 진출 전략",
+      "table_index": 23,
+      "fill_row": 0,
+      "fill_col": 1,
       "evaluation_item": "성장전략",
       "content_area": "사업화",
-      "writing_guide": "진출 권역, 희망 진출 국가, 현지화 전략",
-      "pairs": [
-        ["   ◦ (글로벌 진출 실적/현황)", "     - (해외 고객, 파트너, 매출)"],
-        ["   ◦ (글로벌 진출 계획/목표)", "     - (진출 국가, 현지화 전략, 타임라인)"]
-      ]
+      "writing_guide": "진출 권역, 희망 진출 국가, 현지화 전략"
     },
     {
-      "header_keyword": "운영사 보육 전략",
-      "table_index": 45,
+      "title": "운영사 보육 전략",
+      "table_index": 24,
+      "fill_row": 0,
+      "fill_col": 1,
       "evaluation_item": "팀구성",
       "content_area": "팀",
-      "writing_guide": "운영사의 전담멘토, 보육공간, 사업화 지원 구체 계획",
-      "pairs": [
-        ["   ◦ (운영사 지원 계획)", "     - (전담멘토, 네트워크, 보육공간 등)"]
-      ]
+      "writing_guide": "운영사의 전담멘토, 보육공간, 사업화 지원 구체 계획"
     },
     {
-      "header_keyword": "고용 계획",
-      "table_index": 47,
+      "title": "고용 계획",
+      "table_index": 26,
+      "fill_row": 0,
+      "fill_col": 1,
       "evaluation_item": "성장전략",
       "content_area": "팀",
-      "writing_guide": "현재 고용현황, 향후 고용 유지·창출 계획, 인력 교육",
-      "pairs": [
-        ["   ◦ (현재 고용 현황 + 향후 채용 계획)", "     - (R&D 인력 교육, 스톡옵션 등 인센티브)"]
-      ]
+      "writing_guide": "현재 고용현황, 향후 고용 유지/창출 계획, 인력 교육"
     },
     {
-      "header_keyword": "창업기업 소개",
-      "table_index": 52,
+      "title": "창업기업 소개 (팀 구성)",
+      "table_index": 31,
+      "fill_row": 0,
+      "fill_col": 1,
       "evaluation_item": "팀구성",
       "content_area": "팀",
-      "writing_guide": "대표/CTO/CSO 이력+전문성, 역할 분담, 팀 시너지",
-      "pairs": [
-        ["   ◦ (대표이사 — 핵심 경력 + 이 문제와의 연관성)", "     - (관련 실적, 수상 이력)"],
-        ["   ◦ (CTO — 기술 역량 + 핵심 기여)", "     - (특허, 논문, 개발 경력)"],
-        ["   ◦ (CSO/핵심인력 — 사업개발 역량)", "     - (영업, 마케팅, 파트너십 경력)"],
-        ["   ◦ (팀 시너지 — 역할 분담 및 협력 구조)", "     - (융합형 창업 방안)"]
-      ]
+      "writing_guide": "대표/CTO/CSO 이력+전문성, 역할 분담, 팀 시너지"
     },
     {
-      "header_keyword": "안전 및 보안조치",
-      "table_index": 53,
+      "title": "안전 및 보안조치 이행계획",
+      "table_index": 32,
+      "fill_row": 0,
+      "fill_col": 1,
       "evaluation_item": null,
       "content_area": "기타",
-      "pairs": [
-        ["   ◦ (안전책임자 지정 및 안전교육 계획)", "     - (보안조치 이행 계획)"]
-      ]
+      "writing_guide": "안전책임자 지정, 안전교육, 보안조치"
     }
   ]
 }
