@@ -49,6 +49,60 @@ Phase 1         Phase 2          Phase 3          Phase 3.5            Phase 3.6
   자동            자동         협업 or 자동       자동(필수)           자동(필수)        자동(필수)        자동(메인)     사용자 요청시   AI 리뷰
 ```
 
+### Agent Teams 모드 (병렬 실행, 실험적)
+
+`CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1` 환경변수가 설정되어 있으면, 독립적인 Phase를 병렬로 실행하여 속도를 크게 높일 수 있다.
+
+**팀 구성 (4명):**
+
+| 에이전트 | 역할 | 정의 파일 |
+|---------|------|---------|
+| researcher | 시장 리서치, 출처 검색/검증, 경쟁사 데이터 수집 | `.claude/agents/researcher.md` |
+| writer | 초안 작성, 개조식 문체, 광탈 패턴 배제 | `.claude/agents/writer.md` |
+| reviewer | 심사위원 관점 채점, 킬러 질문, 약점 식별 | `.claude/agents/reviewer.md` |
+| visualizer | 시각 자료 생성 (차트, 아키텍처, 인포그래픽) | `.claude/agents/visualizer.md` |
+
+**병렬 실행 흐름:**
+
+```
+Phase 1~2 (리드가 수행)
+    │
+    ├─→ [researcher] 시장 리서치 + 출처 검증
+    ├─→ [writer] 초안 작성 (researcher 결과 수신 후 반영)
+    │       │
+    │       ├─→ [reviewer] 초안 채점 + 킬러 질문 (writer 완료 후)
+    │       │       │ (약점 발견 시 writer에게 보강 지시)
+    │       │       └─→ 통과 시 writer가 휴먼라이징
+    │       │
+    │       └─→ [visualizer] 시각 자료 생성 (writer 초안 기반, 병렬 진행)
+    │
+    └─→ Phase 4 (리드가 HWPX 채우기)
+```
+
+**태스크 의존성:**
+- `researcher-리서치` → `writer-초안작성` (리서치 결과 필요)
+- `writer-초안작성` → `reviewer-채점` (초안 필요)
+- `writer-초안작성` → `visualizer-시각자료` (초안에서 이미지 목록 추출)
+- `reviewer-채점` → `writer-보강` (60점 미만 항목 발견 시)
+- `writer-보강 완료` → `writer-휴먼라이징` (내용 확정 후)
+- `writer-휴먼라이징` + `visualizer-시각자료` 완료 → `리드-HWPX채우기`
+
+**팀 시작 프롬프트 예시:**
+```
+사업계획서를 Agent Team으로 작성합니다. 아래 팀을 구성하세요:
+- researcher: 시장 리서치 + 출처 검증 (.claude/agents/researcher.md)
+- writer: 초안 작성 (.claude/agents/writer.md)
+- reviewer: 심사위원 검토 (.claude/agents/reviewer.md)
+- visualizer: 시각 자료 생성 (.claude/agents/visualizer.md)
+
+researcher가 리서치를 마치면 writer에게 결과를 전달하세요.
+writer가 초안을 완성하면 reviewer와 visualizer가 동시에 작업을 시작하세요.
+reviewer가 60점 미만 항목을 발견하면 writer에게 보강을 지시하세요.
+모든 팀원이 완료되면 리드가 HWPX 채우기를 진행합니다.
+```
+
+**Agent Teams를 쓰지 않을 때**: 기존처럼 단일 세션에서 순차적으로 Phase 1~5를 수행한다. 대부분의 경우 단일 세션으로 충분하다.
+
 ---
 
 ## Phase 0: 파일 자동 탐색 (스킬 시작 시 항상 실행)

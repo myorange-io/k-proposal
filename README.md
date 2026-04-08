@@ -23,6 +23,7 @@
 | HWPX 자동 생성 | 원본 양식 그대로 유지하며 테이블 + 본문 + 이미지 채우기 |
 | 발표평가 Q&A | 모의 질문 50개+ 답변 자동 생성 (서류 페이지 번호 병기) |
 | TIPS 전용 워크플로우 | 서류평가 4대항목 매칭, 성능지표 역설계, 후속 투자 시나리오, 예산 자동 검증 |
+| **Agent Teams 병렬 실행** | researcher + writer + reviewer + visualizer 4명이 동시 작업 (실험적) |
 
 ---
 
@@ -33,6 +34,10 @@
 ```bash
 git clone https://github.com/myorange-io/k-proposal.git
 cd k-proposal && ./setup.sh
+
+# Agent Teams 활성화 (선택, Claude Code v2.1.32+)
+# settings.json에 추가하거나:
+export CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1
 ```
 
 ### 2. 자료 준비
@@ -155,6 +160,11 @@ tips/ 폴더에 공고 자료를 넣으면 자동으로 TIPS 전용 워크플로
 ```
 k-proposal/
 ├── setup.sh                     # 원스텝 설치
+├── .claude/agents/              # Agent Teams 에이전트 정의
+│   ├── researcher.md            # 시장 리서치 + 출처 검증
+│   ├── writer.md                # 초안 작성 + 휴먼라이징
+│   ├── reviewer.md              # 심사위원 관점 검토
+│   └── visualizer.md            # 시각 자료 생성
 ├── skill/                       # AI 스킬 정의
 │   ├── SKILL.md                 # 전체 워크플로우 + TIPS 전용 워크플로우
 │   ├── hwpx_handler.py          # HWPX 분석/채우기/행추가 (손상 ZIP 자동 복구)
