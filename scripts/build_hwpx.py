@@ -179,7 +179,7 @@ if os.path.exists(fix_script):
     spec.loader.exec_module(fix_mod)
 
 # ============================================================
-# 2.7단계: 빈 ◦/- 단락 자동 삭제
+# 2.7단계: 미사용 불릿 마커(◦/-) 단락 삭제
 # ============================================================
 root = etree.fromstring(all_files['Contents/section0.xml'])
 children = list(root)
@@ -190,10 +190,10 @@ for child in reversed(children):
     if child.find(f'.//{HP}tbl') is not None:
         continue
     txt = get_text(child)
-    if txt in ('◦', 'ㅇ', '○', '-', ''):
+    if txt in ('◦', 'ㅇ', '○', '-'):
         root.remove(child)
         removed_empty += 1
-print(f"빈 ◦/- 단락 삭제: {removed_empty}개")
+print(f"빈 불릿 마커 삭제: {removed_empty}개")
 
 # ============================================================
 # 2.9단계: 작성요령 테이블 삭제

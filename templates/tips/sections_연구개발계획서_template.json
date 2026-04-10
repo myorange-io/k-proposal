@@ -156,7 +156,7 @@
       ]
     },
     {
-      "header_keyword": "안전조치 이행계획",
+      "header_keyword": "1. 안전조치",
       "evaluation_item": null,
       "content_area": "기타",
       "slot_count": {"circle": 1, "dash_per_circle": 1},
@@ -166,7 +166,7 @@
       ]
     },
     {
-      "header_keyword": "보안조치 이행계획",
+      "header_keyword": "2. 보안조치",
       "evaluation_item": null,
       "content_area": "기타",
       "slot_count": {"circle": 1, "dash_per_circle": 1},
@@ -176,7 +176,7 @@
       ]
     },
     {
-      "header_keyword": "그 밖의 조치사항",
+      "header_keyword": "3. 그 밖의 조치",
       "evaluation_item": null,
       "content_area": "기타",
       "slot_count": {"circle": 1, "dash_per_circle": 1},
