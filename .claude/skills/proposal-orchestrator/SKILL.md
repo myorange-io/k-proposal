@@ -83,13 +83,32 @@ TaskCreate(tasks: [
 
 모든 팀원 완료 후 리드가 직접 수행:
 
+**입력 파일:**
 1. `_workspace/02_writer/draft_humanized.md` — 최종 초안
-2. `_workspace/04_visualizer/` — 시각 자료 이미지
-3. k-proposal 스킬의 HWPX 빌드 파이프라인 실행:
-   - build_hwpx.py (테이블 셀 + 본문 채우기)
-   - postprocess_hwpx.py (후처리 + 이미지 삽입)
-   - test_hwpx.py (검증)
-4. 산출물: `제출용_사업계획서.hwpx`
+2. `_workspace/02_writer/draft_sections.json` — 개조식 단락용 구조화 데이터
+3. `_workspace/02_writer/draft_fill.json` — 테이블 셀 데이터 (앞표지+요약문 포함)
+4. `_workspace/04_visualizer/` — 시각 자료 이미지
+5. `data/cover.json` — 커버페이지 데이터 (과제명, 운영사명, 기업명)
+
+**빌드 파이프라인 (8단계):**
+1. **fill**: 앞표지(T0) + 요약문(T2) + 데이터 테이블 셀 채우기
+2. **sections**: 본문 ◦/- 단락 채우기 (sections.json 패턴 매칭)
+3. **fix_body_paragraphs**: 작성요령 잔류 내용 → 본문 이동 (안전망)
+4. **remove_empty_bullets**: 빈 ◦/- 단락 자동 삭제
+5. **remove_guide_tables**: 작성요령 테이블 전체 삭제
+6. **replace_cover**: 커버페이지 플레이스홀더 교체
+7. **postprocess**: 후처리 (lineseg + charPr + 볼드 + 이미지 삽입)
+8. **test_hwpx**: 검증
+
+**Phase 4 완료 조건 (전부 ✅이어야 Phase 5 진행):**
+- [ ] 앞표지 필수 셀 기입 완료
+- [ ] 요약문 필수 셀 기입 완료
+- [ ] 본문 빈 ◦/- 단락 0개
+- [ ] 작성요령 테이블 0개
+- [ ] 커버페이지 플레이스홀더 0개
+- [ ] test_hwpx.py 전 항목 PASS
+
+**산출물:** `제출용_사업계획서.hwpx`
 
 ### Phase 5: 최종 검토 + 정리 (리드 수행)
 

@@ -1,7 +1,37 @@
 {
-  "_comment": "TIPS 일반트랙 연구개발계획서 본문1 테이블 셀 데이터 템플릿. 본문1 단독 양식(T0~T32) 기준.",
-  "_fill_rule": "서술형 테이블(T5,T6,T7,T13,T14,T18,T20,T23,T24,T26,T31,T32)은 sections 템플릿으로 처리. 이 파일은 데이터 테이블(T8,T10,T12,T15,T17,T19,T21,T22,T25,T27,T29)의 셀 값만 다룸.",
+  "_comment": "TIPS 일반트랙 연구개발계획서 전체 테이블 셀 데이터 템플릿. 앞표지(T0) + 요약문(T2) + 본문1 데이터 테이블(T8~T29).",
+  "_fill_rule": "서술형 테이블(T5,T6,T7,T13,T14,T18,T20,T23,T24,T26,T31,T32)은 sections 템플릿으로 처리. 이 파일은 앞표지, 요약문, 데이터 테이블의 셀 값을 다룸.",
   "cells": [
+    {"_label": "--- 앞표지 (T0) ---", "table_index": -1, "row": -1, "col": -1, "text": "", "_section_marker": true},
+
+    {"_label": "T0 과제명 국문", "table_index": 0, "row": 12, "col": 2, "text": "(과제명 국문)", "preserve_style": true},
+    {"_label": "T0 과제명 영문", "table_index": 0, "row": 13, "col": 1, "text": "(과제명 영문)", "preserve_style": true},
+    {"_label": "T0 기관명", "table_index": 0, "row": 14, "col": 2, "text": "(기관명)", "preserve_style": true},
+    {"_label": "T0 사업자번호", "table_index": 0, "row": 14, "col": 4, "text": "(사업자번호)", "preserve_style": true},
+    {"_label": "T0 주소", "table_index": 0, "row": 15, "col": 1, "text": "(우편번호) (주소)", "preserve_style": true},
+    {"_label": "T0 연구책임자 성명", "table_index": 0, "row": 16, "col": 2, "text": "(성명)", "preserve_style": true},
+    {"_label": "T0 연구책임자 직위", "table_index": 0, "row": 16, "col": 4, "text": "(직위)", "preserve_style": true},
+    {"_label": "T0 직장전화", "table_index": 0, "row": 17, "col": 2, "text": "(전화번호)", "preserve_style": true},
+    {"_label": "T0 휴대전화", "table_index": 0, "row": 17, "col": 4, "text": "(휴대전화)", "preserve_style": true},
+    {"_label": "T0 전자우편", "table_index": 0, "row": 18, "col": 1, "text": "(이메일)", "preserve_style": true},
+
+    {"_label": "--- 요약문 (T2) ---", "table_index": -1, "row": -1, "col": -1, "text": "", "_section_marker": true},
+
+    {"_label": "T2 사업명", "table_index": 2, "row": 0, "col": 1, "text": "(사업명)", "preserve_style": true},
+    {"_label": "T2 과제명", "table_index": 2, "row": 5, "col": 1, "text": "(과제명)", "preserve_style": true},
+    {"_label": "T2 연구개발기간", "table_index": 2, "row": 6, "col": 1, "text": "(YYYY.MM.DD ~ YYYY.MM.DD)", "preserve_style": true},
+    {"_label": "T2 최종목표", "table_index": 2, "row": 11, "col": 2, "text": "(최종 목표 500자 내외)", "preserve_style": true},
+    {"_label": "T2 전체내용", "table_index": 2, "row": 12, "col": 1, "text": "(전체 내용 1000자 내외)", "preserve_style": true},
+    {"_label": "T2 기대효과", "table_index": 2, "row": 18, "col": 1, "text": "(연구개발성과 활용계획 및 기대효과 500자 내외)", "preserve_style": true},
+    {"_label": "T2 국문핵심어1", "table_index": 2, "row": 19, "col": 1, "text": "(핵심어1)", "preserve_style": true},
+    {"_label": "T2 국문핵심어2", "table_index": 2, "row": 19, "col": 2, "text": "(핵심어2)", "preserve_style": true},
+    {"_label": "T2 국문핵심어3", "table_index": 2, "row": 19, "col": 3, "text": "(핵심어3)", "preserve_style": true},
+    {"_label": "T2 영문핵심어1", "table_index": 2, "row": 20, "col": 1, "text": "(keyword1)", "preserve_style": true},
+    {"_label": "T2 영문핵심어2", "table_index": 2, "row": 20, "col": 2, "text": "(keyword2)", "preserve_style": true},
+    {"_label": "T2 영문핵심어3", "table_index": 2, "row": 20, "col": 3, "text": "(keyword3)", "preserve_style": true},
+
+    {"_label": "--- 본문1 데이터 테이블 ---", "table_index": -1, "row": -1, "col": -1, "text": "", "_section_marker": true},
+
     {"_label": "T8 성능지표1 항목", "table_index": 8, "row": 2, "col": 0, "text": "(성능지표명)", "preserve_style": true},
     {"_label": "T8 성능지표1 단위", "table_index": 8, "row": 2, "col": 1, "text": "(단위)", "preserve_style": true},
     {"_label": "T8 성능지표1 비중", "table_index": 8, "row": 2, "col": 2, "text": "(비중%)", "preserve_style": true},

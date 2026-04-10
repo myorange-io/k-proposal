@@ -169,10 +169,84 @@ for header_keyword, pairs in SECTIONS:
 print(f"\n개조식 단락 채움: {count}개")
 
 # ============================================================
+# 2.5단계: 작성요령 테이블 셀 → 본문 ◦/- 단락 이동 (안전망)
+# ============================================================
+fix_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fix_body_paragraphs.py')
+if os.path.exists(fix_script):
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("fix_body_paragraphs", fix_script)
+    fix_mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(fix_mod)
+
+# ============================================================
+# 2.7단계: 빈 ◦/- 단락 자동 삭제
+# ============================================================
+root = etree.fromstring(all_files['Contents/section0.xml'])
+children = list(root)
+removed_empty = 0
+for child in reversed(children):
+    if child.tag.split('}')[-1] != 'p':
+        continue
+    if child.find(f'.//{HP}tbl') is not None:
+        continue
+    txt = get_text(child)
+    if txt in ('◦', 'ㅇ', '○', '-', ''):
+        root.remove(child)
+        removed_empty += 1
+print(f"빈 ◦/- 단락 삭제: {removed_empty}개")
+
+# ============================================================
+# 2.9단계: 작성요령 테이블 삭제
+# ============================================================
+children = list(root)
+removed_guides = 0
+for child in reversed(children):
+    if child.tag.split('}')[-1] != 'p':
+        continue
+    tbl = child.find(f'.//{HP}tbl')
+    if tbl is None:
+        continue
+    rows = tbl.findall(f'{HP}tr')
+    if not rows:
+        continue
+    cells = rows[0].findall(f'{HP}tc')
+    if not cells:
+        continue
+    first_cell_text = get_text(cells[0])
+    if '작성요령' in first_cell_text:
+        root.remove(child)
+        removed_guides += 1
+print(f"작성요령 테이블 삭제: {removed_guides}개")
+
+# ============================================================
+# 3-0단계: 커버페이지 플레이스홀더 교체
+# ============================================================
+cover_json = os.path.join(BASE, "data", "cover.json")
+if os.path.exists(cover_json):
+    with open(cover_json, 'r', encoding='utf-8') as f:
+        cover_data = json.load(f)
+    cover_replacements = {
+        "(과제명) 창업기업의 사업에 대한 소개글": cover_data.get("title", ""),
+        "운영사명": cover_data.get("operator", ""),
+        "창업기업명": cover_data.get("company", ""),
+    }
+    cover_count = 0
+    for child in root.iter(f'{HP}t'):
+        if child.text and child.text.strip() in cover_replacements:
+            replacement = cover_replacements[child.text.strip()]
+            if replacement:
+                child.text = replacement
+                cover_count += 1
+    print(f"커버페이지 교체: {cover_count}개")
+else:
+    print("WARN: data/cover.json 없음. 커버페이지 교체를 건너뜁니다.")
+
+all_files['Contents/section0.xml'] = etree.tostring(root, xml_declaration=True, encoding='UTF-8', standalone=True)
+
+# ============================================================
 # 3단계: 저장 (XML 선언 큰따옴표 + 원본 ZIP 메타데이터 보존)
 # ============================================================
-xml_bytes = etree.tostring(root, xml_declaration=True, encoding='UTF-8', standalone=True)
-xml_str = xml_bytes.decode('utf-8')
+xml_str = all_files['Contents/section0.xml'].decode('utf-8')
 xml_str = re.sub(r'<\?xml[^?]*\?>', '<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>', xml_str, count=1)
 all_files['Contents/section0.xml'] = xml_str.encode('utf-8')
 
