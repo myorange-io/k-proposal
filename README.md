@@ -12,18 +12,20 @@
 
 | 기능 | 설명 |
 |------|------|
-| 공고문 자동 분석 | HWPX/HWP/PDF 공고문에서 평가기준, 예산규칙, 일정, 제출서류 자동 추출 |
+| 공고문 자동 분석 | HWPX/HWP/PDF 공고문에서 평가기준, 예산규칙, 일정, 제출서류 자동 추출 (kordoc MCP) |
 | 양식 자동 인식 | 새 양식의 테이블 구조를 자동 파악하여 template_map 초안 생성 |
 | 회사 자료 분석 | 재무제표, 서비스소개서, IR 자료에서 핵심 데이터 자동 추출 |
-| 초안 작성 | Why Now / Why Us / Why 지원 필요 -- 합격하는 논리 구조로 섹션별 작성 |
-| 휴먼라이징 | AI 작성 흔적 30개 패턴 자동 탐지 + 치환. 심사역은 AI 문체를 3초 만에 안다 |
+| 초안 작성 | Why Now / Why Us / Why 지원 필요 -- 합격하는 논리 구조. `sections.json` + `fill.json` 동시 생성 |
+| **양식 충족 게이트** | 앞표지/요약문/KIPRIS/위탁기관/기술유출방지/단위정합 등 10개 필수항목 사전검증. 미충족 시 채점 차단 |
 | **심사위원 관점 검토** | 평가기준별 모의 채점 + 킬러 질문 생성 + 약점 자동 개선. 60점 미만 시 진행 차단 |
+| 휴먼라이징 | AI 작성 흔적 30개 패턴 자동 탐지 + 치환. 심사역은 AI 문체를 3초 만에 안다 |
 | 광탈 패턴 감지 | "세계 최고 수준", "혁신적인", "1식" 산출근거 등 감점 표현 자동 차단 |
 | 시각 자료 생성 | 시장규모 차트, 서비스 아키텍처, KPI 인포그래픽 (브랜드 색상 자동 추출) |
-| HWPX 자동 생성 | 원본 양식 그대로 유지하며 테이블 + 본문 + 이미지 채우기 |
+| **HWPX 8단계 파이프라인** | 앞표지/요약문 채우기 → 본문 채우기 → 빈슬롯 삭제 → 작성요령 삭제 → 커버 교체 → 후처리 → 검증 |
+| KIPRIS 특허 검색 | 핵심 기술 기반 유사 등록특허 10건 자동 검색 (TIPS 필수) |
 | 발표평가 Q&A | 모의 질문 50개+ 답변 자동 생성 (서류 페이지 번호 병기) |
 | TIPS 전용 워크플로우 | 서류평가 4대항목 매칭, 성능지표 역설계, 후속 투자 시나리오, 예산 자동 검증 |
-| **Agent Teams 병렬 실행** | researcher + writer + reviewer + visualizer 4명이 동시 작업 (실험적) |
+| **Agent Teams 병렬 실행** | researcher(KIPRIS 포함) + writer(구조화 출력) + reviewer(양식게이트) + visualizer 4명 동시 작업 |
 
 ---
 
@@ -64,11 +66,14 @@ AI가 폴더를 자동 탐색하고, 모드를 물어봅니다:
 
 ```
 프로젝트폴더/
-├── 제출용_사업계획서.hwpx       ← 메인 산출물
+├── 제출용_사업계획서.hwpx       ← 메인 산출물 (작성요령 삭제, 커버 교체 완료)
 ├── _시각자료/                   ← 차트, 아키텍처 이미지
 ├── _사업계획서_준비자료.md      ← 공고 분석 + 회사 자료 정리
 ├── _초안.md                    ← 마크다운 초안
+├── _초안_sections.json          ← HWPX 개조식 단락용 구조화 데이터
+├── _초안_fill.json              ← HWPX 테이블 셀 데이터 (앞표지+요약문 포함)
 ├── _심사위원_검토결과.md        ← 모의 채점 결과 + 개선 내역
+├── _양식충족_검증결과.md        ← 필수항목 10개 사전검증 결과
 └── _발표평가_Q&A.md            ← 모의 질문 50개+ 답변
 ```
 
@@ -77,29 +82,39 @@ AI가 폴더를 자동 탐색하고, 모드를 물어봅니다:
 ## 작동 원리
 
 ```
-Phase 0    Phase 1       Phase 2        Phase 3      Phase 3.5          Phase 3.6     Phase 3.7     Phase 4       Phase 5
-파일탐색 → 공고/양식분석 → 회사자료분석 → 초안작성 → 심사위원 관점 검토 → 휴먼라이징 → 시각자료생성 → HWPX채우기 → 검토/제출
+Phase 0    Phase 1       Phase 2        Phase 3      Phase 3.5          Phase 3.6     Phase 3.7     Phase 4           Phase 5
+파일탐색 → 공고/양식분석 → 회사자료분석 → 초안작성 → 심사위원 관점 검토 → 휴먼라이징 → 시각자료생성 → HWPX 8단계 빌드 → 검토/제출
 ```
 
 | Phase | 뭘 하나요? | 왜 필요한가요? |
 |-------|-----------|---------------|
 | 0 | 폴더 자동 탐색, 파일 분류 | 경로 묻지 않고 바로 시작 |
 | 1 | 공고문에서 평가기준, 예산, 일정 추출. 양식 테이블 분석 | 평가기준에 맞춰 써야 점수가 높음 |
-| 2 | 재무제표, 소개서에서 팀/기술/실적 추출 | 실제 데이터로 써야 신뢰도가 높음 |
-| 3 | Why Now / Why Us / Why 지원 필요 논리축으로 초안 작성 | 논리 구조가 합격의 핵심 |
-| **3.5** | **심사위원 관점 모의 채점 + 킬러 질문 + 약점 개선** | **60점 미만 항목을 내용 확정 전에 잡아냄** |
+| 2 | 재무제표, 소개서에서 팀/기술/실적 추출. **KIPRIS 특허 검색** | 실제 데이터로 써야 신뢰도가 높음 |
+| 3 | Why Now / Why Us / Why 지원 필요 논리축으로 초안 + **sections.json/fill.json** 동시 생성 | 양식 슬롯 수에 정확히 대응하는 구조화된 출력 |
+| **3.5** | **양식 충족 게이트(10항목) + 모의 채점 + 킬러 질문 + 약점 개선** | **필수항목 누락 + 60점 미만을 HWPX 생성 전에 차단** |
 | 3.6 | AI 흔적 제거, 개조식 명사형 문체 전환 | 내용 확정 후 휴먼라이징해야 AI 흔적이 안 남음 |
 | 3.7 | 시장규모 차트, 아키텍처 등 이미지 생성 | HWPX에 삽입할 시각자료 선준비 |
-| 4 | 원본 양식에 초안 + 시각자료 삽입, HWPX 생성 | 제출 형식 그대로 완성 |
+| **4** | **앞표지→요약문→본문→빈슬롯삭제→작성요령삭제→커버교체→후처리→검증** | **8단계 파이프라인으로 완전한 제출 파일 생성** |
 | 5 | 광탈 패턴 최종 점검, 팩트체크, Q&A 생성 | 제출 전 마지막 안전망 |
 
-### Phase 3.6: 심사위원 관점 검토 (상세)
+### Phase 3.5: 양식 충족 게이트 + 심사위원 검토 (상세)
 
-초안 완성 후 HWPX 채우기 전에 **반드시** 수행하는 품질 관문.
+초안 완성 후 HWPX 채우기 전에 **반드시** 수행하는 이중 관문.
+
+**0단계 -- 양식 충족 게이트** (채점 전 선행, 1개라도 미충족 시 채점 불가):
 
 ```
-초안 완료 → [1] 평가기준 채점 → [2] 킬러 질문 → [3] 약점 개선 → [4] 재채점 → 통과 시 Phase 3.7
-             60점 미만 차단      답변 불가 식별     보강 실행       전항목 60+ 확인
+[ ] 앞표지 필수 셀 (과제명, 기관명, 연구책임자, 연구개발비)
+[ ] 요약문 필수 셀 (최종목표, 전체내용, 기대효과, 핵심어)
+[ ] 사업화 목표 단위 정합 (백만원 vs 천원)
+[ ] KIPRIS 문장검색 결과 10건 포함
+[ ] 위탁기관명 특정 + 역할분담 근거
+[ ] 기술유출 방지대책 기재
+[ ] 고용창출 서술 (스톡옵션/내일채움공제/교육)
+[ ] 5-1 안전 / 5-2 보안 / 5-3 기타 각각 구분 기재
+[ ] 커버페이지 플레이스홀더 실제 값 교체
+[ ] 빈 ◦/- 단락 잔존 여부
 ```
 
 **1단계 -- 모의 채점**: 공고문의 평가기준에 맞춰 심사위원 2인(현장 전문가 + 심사 경력 심사역)을 시뮬레이션. 항목당 100점. 60점 미만이 하나라도 있으면 다음 단계로 진행하지 않습니다.
@@ -160,24 +175,28 @@ tips/ 폴더에 공고 자료를 넣으면 자동으로 TIPS 전용 워크플로
 ```
 k-proposal/
 ├── setup.sh                     # 원스텝 설치
-├── .claude/agents/              # Agent Teams 에이전트 정의
-│   ├── researcher.md            # 시장 리서치 + 출처 검증
-│   ├── writer.md                # 초안 작성 + 휴먼라이징
-│   ├── reviewer.md              # 심사위원 관점 검토
-│   └── visualizer.md            # 시각 자료 생성
-├── skill/                       # AI 스킬 정의
-│   ├── SKILL.md                 # 전체 워크플로우 + TIPS 전용 워크플로우
-│   ├── hwpx_handler.py          # HWPX 분석/채우기/행추가 (손상 ZIP 자동 복구)
+├── CLAUDE.md                    # 스킬 라우팅 + MCP 설정
+├── .claude/
+│   ├── agents/                  # Agent Teams 에이전트 정의
+│   │   ├── researcher.md        #   시장 리서치 + 출처 검증 + KIPRIS 특허 검색
+│   │   ├── writer.md            #   초안 + sections.json + fill.json 동시 생성
+│   │   ├── reviewer.md          #   양식충족 게이트(10항목) + 심사위원 채점
+│   │   └── visualizer.md        #   시각 자료 생성
+│   └── skills/
+│       └── proposal-orchestrator/
+│           └── SKILL.md         # 오케스트레이터 (Phase 4: 8단계 빌드)
+├── skill/                       # 핵심 도구
+│   ├── hwpx_handler.py          # HWPX 분석/채우기/행추가/이미지삽입/단락삽입
 │   ├── visual_gen.py            # 시각 자료 생성 (matplotlib + Gemini + mermaid)
 │   ├── text_sanitizer.py        # 한국어 텍스트 정제
-│   ├── kordoc_bridge.py         # kordoc CLI 브릿지
-│   └── template_map.json        # 일반 사업화 자금 양식 매핑
+│   └── kordoc_bridge.py         # kordoc CLI 브릿지
 ├── scripts/                     # HWPX 빌드 파이프라인
-│   ├── build_hwpx.py            # 테이블 셀 + 개조식 본문 채우기
+│   ├── build_hwpx.py            # 8단계: fill → sections → 빈슬롯삭제 → 작성요령삭제 → 커버교체 → ...
+│   ├── fix_body_paragraphs.py   # 작성요령 테이블 → 본문 ◦/- 단락 이동 (안전망)
 │   ├── postprocess_hwpx.py      # diff 후처리 (겹침해결 + 볼드 + 이미지 + 네임스페이스)
-│   ├── fix_namespaces.py        # ns0:/ns1: -> hh/hc/hp/hs 정규화
-│   ├── insert_image.py          # HWPX 이미지 삽입 (3단계)
-│   ├── auto_template_map.py     # 양식 자동 인식 -> template_map 생성
+│   ├── fix_namespaces.py        # ns0:/ns1: → hh/hc/hp/hs 정규화
+│   ├── insert_image.py          # HWPX 이미지 삽입 (manifest + pic XML)
+│   ├── auto_template_map.py     # 양식 자동 인식 → template_map 생성
 │   ├── compare_docs.py          # 문서 비교 (신구대조표)
 │   └── test_hwpx.py             # HWPX 파일 자동 검증
 ├── templates/                   # JSON 데이터 템플릿
@@ -187,17 +206,14 @@ k-proposal/
 │   ├── bold_keywords_template.json
 │   ├── images_template.json
 │   └── tips/                    # TIPS 전용 템플릿
-│       ├── fill_연구개발계획서_template.json
-│       ├── sections_연구개발계획서_template.json
+│       ├── fill_연구개발계획서_template.json   # 앞표지(T0) + 요약문(T2) + 본문 55셀
+│       ├── sections_연구개발계획서_template.json  # 15개 섹션 (업무분장/고용창출/5-1/5-2/5-3 포함)
 │       ├── bold_keywords_tips_template.json
 │       └── images_tips_template.json
 ├── tips/                        # TIPS 관련 자료 + 매핑
-│   ├── template_map_tips_일반트랙.json
-│   ├── TIPS_리서치_2024_2026.md
-│   └── (공고문, 운영지침, 별지서식, 유의사항)
+│   └── template_map_tips_일반트랙.json
 ├── references/                  # HWPX 내부 구조 레퍼런스
-├── evals/                       # 품질 검증 12개 테스트 케이스
-└── examples/
+└── evals/                       # 품질 검증 테스트 케이스
 ```
 
 ---
@@ -206,24 +222,45 @@ k-proposal/
 
 ```
 원본 양식 HWPX
-    |
-    v
+    │
+    ▼
 [build_hwpx.py]
-    Step 1: 테이블 셀 채우기 (hwpx_handler fill)
-    Step 2: 개조식 본문 채우기 (lxml 텍스트 패턴 매칭)
-    |
-    v
+    Step 1:   테이블 셀 채우기 — 앞표지(T0) + 요약문(T2) + 데이터 테이블 (hwpx_handler fill)
+    Step 2:   개조식 본문 채우기 — sections.json 패턴 매칭 (lxml)
+    Step 2.5: 작성요령 잔류 내용 → 본문 ◦/- 이동 (fix_body_paragraphs.py, 안전망)
+    Step 2.7: 미사용 빈 불릿 마커(◦/-) 삭제
+    Step 2.9: 작성요령 테이블 전체 삭제
+    Step 3-0: 커버페이지 플레이스홀더 교체 (과제명, 운영사명, 기업명)
+    │
+    ▼
 [postprocess_hwpx.py]
-    Step 3: linesegarray 교체 (글자 겹침 해결)
-    Step 4: charPr 색상 변경 (파란 가이드 -> 검정)
-    Step 5: 볼드+밑줄 키워드 강조
-    Step 6: 이미지 삽입 (BinData + manifest + hp:pic)
-    Step 7: ZIP 메타데이터 복원
-    Step 8: 네임스페이스 정규화
-    |
-    v
-제출용 HWPX
+    Step 3:   linesegarray 교체 (글자 겹침 해결)
+    Step 4:   charPr 색상 변경 (파란 가이드 → 검정)
+    Step 5:   볼드+밑줄 키워드 강조
+    Step 6:   이미지 삽입 (BinData + manifest + hp:pic)
+    Step 7:   ZIP 메타데이터 복원
+    Step 8:   네임스페이스 정규화
+    │
+    ▼
+[test_hwpx.py]
+    검증: XML 구조, 스타일 참조, 이미지 manifest, 변경 비율
+    │
+    ▼
+제출용 HWPX (작성요령 0개, 빈슬롯 0개, 커버 교체 완료)
 ```
+
+### Phase 4 완료 조건
+
+HWPX 빌드 완료 후 아래 6개 조건을 모두 충족해야 다음 Phase로 진행합니다.
+
+| 조건 | 검증 방법 |
+|------|----------|
+| 앞표지 필수 셀 기입 | test_hwpx.py + 수동 확인 |
+| 요약문 필수 셀 기입 | test_hwpx.py + 수동 확인 |
+| 본문 빈 ◦/- 단락 0개 | build_hwpx.py Step 2.7 자동 삭제 |
+| 작성요령 테이블 0개 | build_hwpx.py Step 2.9 자동 삭제 |
+| 커버 플레이스홀더 0개 | build_hwpx.py Step 3-0 자동 교체 |
+| test_hwpx.py 전 항목 PASS | 자동 실행 |
 
 ---
 
@@ -232,12 +269,15 @@ k-proposal/
 ### HWPX 양식 분석
 
 ```bash
-HANDLER="python ~/.claude/skills/k-proposal/hwpx_handler.py"
+HANDLER="python skill/hwpx_handler.py"
 
 $HANDLER analyze "양식.hwpx"                    # 전체 테이블 구조
 $HANDLER analyze "양식.hwpx" -t 1 -a            # 특정 테이블 전체 행
 $HANDLER read-table "양식.hwpx" -t 3 --json     # JSON 형식 읽기
-$HANDLER fill "양식.hwpx" "출력.hwpx" --data data.json  # 채우기
+$HANDLER fill "양식.hwpx" "출력.hwpx" --data data.json              # 채우기
+$HANDLER fill "양식.hwpx" "출력.hwpx" --data data.json --validate   # 사전 검증만
+$HANDLER insert-text "양식.hwpx" "출력.hwpx" --after-table 5 --text "본문 추가"
+$HANDLER insert-image "양식.hwpx" "출력.hwpx" --after-table 5 -i chart.png
 ```
 
 ### 시각 자료 생성
@@ -252,11 +292,13 @@ $VGEN gemini "System architecture diagram" -o arch.png        # Gemini 개념도
 
 지원 차트: `bar`, `horizontal_bar`, `line`, `area`, `pie`, `donut`, `stacked_bar`, `grouped_bar`, `infographic`
 
-### 양식 자동 인식 + 문서 비교
+### 양식 자동 인식 + 문서 비교 + 본문 복구
 
 ```bash
 python scripts/auto_template_map.py "양식.hwpx" -o template_map.json
 python scripts/compare_docs.py "원본.hwpx" "수정본.hwpx" -o _비교결과.md
+python scripts/fix_body_paragraphs.py "문제파일.hwpx" "수정파일.hwpx"  # 작성요령→본문 이동
+python scripts/test_hwpx.py "제출용.hwpx" --orig "원본양식.hwpx"      # 자동 검증
 ```
 
 ---
@@ -285,7 +327,33 @@ python scripts/compare_docs.py "원본.hwpx" "수정본.hwpx" -o _비교결과.m
 |------|--------|-----------|
 | Python | `lxml`, `python-docx`, `matplotlib`, `Pillow` | 필수 |
 | Python | `google-genai` | Gemini 이미지 생성 시 |
-| Node.js | `kordoc` (via npx) | HWP/PDF 고급 파싱 (선택) |
+| npm | `kordoc-mcp` (글로벌 설치: `npm i -g kordoc-mcp`) | HWP/HWPX/PDF 파싱 MCP 서버 |
+
+### kordoc MCP 서버 설정
+
+`.cursor/mcp.json`:
+```json
+{
+  "mcpServers": {
+    "kordoc": {
+      "command": "kordoc-mcp",
+      "args": []
+    }
+  }
+}
+```
+
+CLI로도 직접 사용 가능: `kordoc <파일경로>`
+
+---
+
+## 변경 이력
+
+| 날짜 | 변경 내용 |
+|------|----------|
+| 2026-04-10 | 스킬 근본 수정: writer 구조화 출력(sections.json/fill.json), reviewer 양식충족 게이트 10항목, researcher KIPRIS 검색, sections 템플릿 15개 섹션(업무분장/고용창출/5-1/5-2/5-3 분리), fill 템플릿 앞표지+요약문 55셀, build_hwpx.py 8단계(빈슬롯삭제/작성요령삭제/커버교체), orchestrator Phase 4 세분화 |
+| 2026-04-10 | 작성요령 테이블→본문 단락 이동 스크립트(`fix_body_paragraphs.py`) 추가, kordoc MCP 글로벌 설치 전환 |
+| 2026-04-09 | 하네스 초기 구성: 에이전트 4종(researcher/writer/reviewer/visualizer) + 오케스트레이터 |
 
 ---
 
