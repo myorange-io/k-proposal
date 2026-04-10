@@ -368,17 +368,6 @@ CLI로도 직접 사용 가능: `kordoc <파일경로>`
 
 ---
 
-## 변경 이력
-
-| 날짜 | 변경 내용 |
-|------|----------|
-| 2026-04-10 | gstack 패턴 스킬 분리: 모놀리식 SKILL.md(1,768줄) → 6개 독립 스킬(proposal-analyze/research/write/review/build/qa) + 오케스트레이터. 각 스킬 단독 사용 가능 |
-| 2026-04-10 | 스킬 근본 수정: writer 구조화 출력(sections.json/fill.json), reviewer 양식충족 게이트 10항목, researcher KIPRIS 검색, sections 템플릿 15개 섹션(업무분장/고용창출/5-1/5-2/5-3 분리), fill 템플릿 앞표지+요약문 55셀, build_hwpx.py 8단계(빈슬롯삭제/작성요령삭제/커버교체), orchestrator Phase 4 세분화 |
-| 2026-04-10 | 작성요령 테이블→본문 단락 이동 스크립트(`fix_body_paragraphs.py`) 추가, kordoc MCP 글로벌 설치 전환 |
-| 2026-04-09 | 하네스 초기 구성: 에이전트 4종(researcher/writer/reviewer/visualizer) + 오케스트레이터 |
-
----
-
 ## 참고한 저장소
 
 | 저장소 | 참고 내용 |
