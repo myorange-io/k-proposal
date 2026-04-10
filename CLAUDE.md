@@ -34,20 +34,23 @@ Key routing rules:
 
 ## MCP Servers
 
-kordoc MCP 서버가 설치되어 있으면 문서 파싱에 활용한다.
+kordoc MCP 서버로 문서 파싱을 수행한다.
 HWP, HWPX, PDF, XLSX, DOCX 파일을 마크다운으로 변환하고,
 양식 필드를 자동 인식하고, 두 문서를 비교할 수 있다.
 
+`.cursor/mcp.json` 설정:
 ```json
 {
   "mcpServers": {
     "kordoc": {
-      "command": "npx",
-      "args": ["-y", "kordoc-mcp"]
+      "command": "kordoc-mcp",
+      "args": []
     }
   }
 }
 ```
+
+CLI 직접 사용: `kordoc <파일경로>` (글로벌 설치 완료)
 
 사용 가능한 MCP 도구:
 - `parse_document` — HWP/HWPX/PDF/XLSX/DOCX → 마크다운 변환
