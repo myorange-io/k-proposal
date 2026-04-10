@@ -21,15 +21,25 @@ Key routing rules:
 
 ## 하네스: k-proposal
 
-**목표:** 정부지원사업 사업계획서(TIPS 포함)를 에이전트 팀으로 자동 작성
+**목표:** 정부지원사업 사업계획서(TIPS 포함)를 6개 전문 스킬 파이프라인으로 자동 작성
 
-**트리거:** 사업계획서, TIPS 연구개발계획서, 계획서 작성 요청 시 `proposal-orchestrator` 스킬을 사용하라. 단순 질문은 직접 응답 가능.
+**트리거 → 스킬 라우팅:**
+- 사업계획서 작성, TIPS 연구개발계획서, 계획서 전체 → `proposal-orchestrator` (전체 파이프라인)
+- 공고문 분석, 양식 분석 → `proposal-analyze`
+- 시장 리서치, 경쟁사 분석, KIPRIS → `proposal-research`
+- 초안 작성, 초안 보강, 휴먼라이징, 시각자료 → `proposal-write`
+- 계획서 검토, 심사위원 채점, 양식 충족 → `proposal-review`
+- HWPX 채우기, HWPX 빌드 → `proposal-build`
+- 발표평가 준비, Q&A 생성, 최종 점검 → `proposal-qa`
+- 단순 질문은 직접 응답 가능
 
-**에이전트 팀:** researcher(리서치) + writer(초안) + reviewer(심사위원 검토) + visualizer(시각자료)
+**에이전트 팀:** researcher(리서치+KIPRIS) + writer(초안+sections.json) + reviewer(양식게이트+채점) + visualizer(시각자료)
 
 **변경 이력:**
 | 날짜 | 변경 내용 | 대상 | 사유 |
 |------|----------|------|------|
+| 2026-04-10 | gstack 패턴 스킬 분리: 6개 독립 스킬 + 오케스트레이터 | 전체 | 모놀리식 1,768줄 → 스킬별 분리 |
+| 2026-04-10 | 스킬 근본 수정: 양식게이트, KIPRIS, sections.json 출력 등 | 에이전트+템플릿 | 재발 방지 |
 | 2026-04-09 | 하네스 초기 구성 | 전체 | 에이전트 4종 + 오케스트레이터 생성 |
 
 ## MCP Servers
