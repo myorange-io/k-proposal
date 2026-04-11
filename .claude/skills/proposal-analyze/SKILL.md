@@ -85,7 +85,7 @@ find . -maxdepth 3 \( \
 
 | 유형 | 핵심 판단 신호 | 전략 가중치 |
 |------|-------------|-----------|
-| **예비창업패키지** | "예비창업자", 매출 0 허용 | 아이디어 신선도·창업 의지 최대화 |
+| **예비창업패키지/초기창업패키지** | "예비창업자", "초기창업", 매출 0 허용 | 아이디어 신선도·창업 의지 최대화 |
 | **창업도약패키지** | "3년 이내", 스케일업 강조 | 시장 검증 증거·스케일업 시나리오 |
 | **TIPS/딥테크** | "기술성", 투자사 연계 | 기술 차별성·논문·특허·투자확약서 |
 | **지역 R&D/사업화** | 지자체 주관, 지역 명시 | 지역 기여·지역 파트너·지역 고용 극대화 |
@@ -133,6 +133,23 @@ python scripts/auto_template_map.py "양식.hwpx" -o template_map_draft.json
 - 예산규칙(비목별 한도 포함)
 - 양식 테이블맵
 - 광탈 패턴 목록, 지역성 포인트
+
+### 유형 → 템플릿 경로 매핑
+
+준비자료에 아래 두 필드를 반드시 기록한다. 이후 `/proposal-write`와 `/proposal-build`가 이 값으로 해당 유형의 템플릿을 자동 로드한다.
+
+```
+proposal_type: tips | startup | scaleup | regional | general
+template_dir: templates/tips/ | templates/startup/ | templates/scaleup/ | templates/regional/ | templates/
+```
+
+| 유형 | proposal_type | template_dir |
+|------|--------------|-------------|
+| TIPS/딥테크 | tips | templates/tips/ |
+| 예비창업/초기창업패키지 | startup | templates/startup/ |
+| 창업도약패키지 | scaleup | templates/scaleup/ |
+| 지역 R&D/사업화 | regional | templates/regional/ |
+| 일반 사업화 / 기타 | general | templates/ |
 
 ---
 

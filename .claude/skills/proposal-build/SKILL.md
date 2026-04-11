@@ -64,6 +64,8 @@ test_hwpx — 자동 검증
 | `data/cover.json` | 커버페이지 (과제명, 운영사명, 기업명) |
 | `data/bold_keywords.json` | 볼드+밑줄 강조 키워드 목록 |
 
+writer가 `준비자료.md`의 `template_dir`에 따라 유형별 템플릿으로 sections.json/fill.json을 생성하므로, build는 유형을 직접 판단하지 않고 writer 산출물을 그대로 사용한다.
+
 ---
 
 ## 주요 명령어

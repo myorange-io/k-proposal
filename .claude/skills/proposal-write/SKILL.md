@@ -66,6 +66,19 @@ description: "사업계획서 초안 작성 + 휴먼라이징 + 시각자료 생
 
 ## Step 2: 섹션별 초안 작성
 
+### 템플릿 로딩 규칙
+
+준비자료(`_workspace/00_input/준비자료.md`)의 `template_dir` 값을 읽어 해당 디렉토리의 템플릿을 사용한다:
+
+| 템플릿 | 파일 패턴 |
+|--------|---------|
+| sections | `{template_dir}/sections_template.json` 또는 `{template_dir}/sections_*.json` |
+| fill | `{template_dir}/fill_template.json` 또는 `{template_dir}/fill_*.json` |
+| bold_keywords | `{template_dir}/bold_keywords_template.json` 또는 `{template_dir}/bold_keywords_*.json` |
+| images | `{template_dir}/images_template.json` 또는 `{template_dir}/images_*.json` |
+
+`template_dir`이 없거나 해당 파일이 없으면 `templates/` 루트의 기본 템플릿을 사용한다.
+
 **양식 구조 기준으로 작성.** 양식의 테이블맵·섹션명·ㅇ/- 단락 수를 그대로 따른다.
 
 ### 양식 슬롯 대응 원칙 (필수)

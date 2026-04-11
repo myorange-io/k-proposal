@@ -220,17 +220,19 @@ k-proposal/
 │   ├── auto_template_map.py     # 양식 자동 인식 → template_map 생성
 │   ├── compare_docs.py          # 문서 비교 (신구대조표)
 │   └── test_hwpx.py             # HWPX 파일 자동 검증
-├── templates/                   # JSON 데이터 템플릿
-│   ├── fill_신청서_template.json
-│   ├── fill_사업계획서_template.json
+├── templates/                   # JSON 데이터 템플릿 (유형별 디렉토리)
+│   ├── fill_사업계획서_template.json       # 일반(general) 기본 템플릿
 │   ├── sections_template.json
 │   ├── bold_keywords_template.json
 │   ├── images_template.json
-│   └── tips/                    # TIPS 전용 템플릿
-│       ├── fill_연구개발계획서_template.json   # 앞표지(T0) + 요약문(T2) + 본문 55셀
-│       ├── sections_연구개발계획서_template.json  # 15개 섹션 (업무분장/고용창출/5-1/5-2/5-3 포함)
-│       ├── bold_keywords_tips_template.json
-│       └── images_tips_template.json
+│   ├── tips/                              # TIPS R&D (완성)
+│   │   ├── fill_연구개발계획서_template.json
+│   │   ├── sections_연구개발계획서_template.json
+│   │   ├── bold_keywords_tips_template.json
+│   │   └── images_tips_template.json
+│   ├── startup/                           # 예비창업/초기창업패키지 (빈 템플릿, 양식 입수 후 채움)
+│   ├── scaleup/                           # 창업도약패키지 (빈 템플릿)
+│   └── regional/                          # 지역 R&D/사업화 (빈 템플릿)
 ├── tips/                        # TIPS 관련 자료 + 매핑
 │   └── template_map_tips_일반트랙.json
 ├── references/                  # HWPX 내부 구조 레퍼런스

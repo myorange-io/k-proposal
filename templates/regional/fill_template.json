@@ -1,0 +1,6 @@
+{
+  "_comment": "지역 R&D/사업화 테이블 셀 데이터 템플릿. 실제 공고 양식 입수 후 table_index/row/col을 채울 것.",
+  "_proposal_type": "regional",
+  "_fill_rule": "서술형 테이블은 sections 템플릿으로 처리. 이 파일은 데이터 테이블의 셀 값만 다룸.",
+  "cells": []
+}

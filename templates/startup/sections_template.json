@@ -1,0 +1,7 @@
+{
+  "_comment": "예비창업패키지/초기창업패키지 서술형 본문 템플릿. 실제 공고 양식 입수 후 header_keyword와 pairs를 채울 것.",
+  "_proposal_type": "startup",
+  "_fill_method": "header_keyword로 섹션 제목 단락을 찾고, pairs의 (ㅇ텍스트, -텍스트)로 ◦/- 단락을 채운다.",
+  "_slot_rule": "pairs 배열 길이는 양식의 ◦/- 슬롯 수와 정확히 일치해야 한다.",
+  "sections": []
+}
