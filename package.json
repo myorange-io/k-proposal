@@ -1,0 +1,12 @@
+{
+  "name": "hwpx-gov-skill",
+  "private": true,
+  "type": "module",
+  "description": "정부지원사업 사업계획서 HWPX 자동 작성 도구",
+  "scripts": {
+    "validate": "node scripts/validate_rhwp.mjs"
+  },
+  "dependencies": {
+    "@rhwp/core": "^0.7.0"
+  }
+}

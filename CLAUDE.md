@@ -38,6 +38,8 @@ Key routing rules:
 **변경 이력:**
 | 날짜 | 변경 내용 | 대상 | 사유 |
 |------|----------|------|------|
+| 2026-04-16 | rhwp 참고 반영: @rhwp/core WASM 검증, 누름틀 필드 API, LINE_SEG 모니터링, xml-internals 크로스레퍼런스 보강 | hwpx_handler, auto_template_map, xml-internals, test_hwpx | rhwp 프로젝트 분석 결과 반영 |
+| 2026-04-16 | 작성요령 자동 추출: guide_table_contents 추출 + writing_guide_full 연동 | auto_template_map, proposal-write, proposal-analyze | 양식 작성요령을 writer에 자동 전달 |
 | 2026-04-10 | gstack 패턴 스킬 분리: 6개 독립 스킬 + 오케스트레이터 | 전체 | 모놀리식 1,768줄 → 스킬별 분리 |
 | 2026-04-10 | 스킬 근본 수정: 양식게이트, KIPRIS, sections.json 출력 등 | 에이전트+템플릿 | 재발 방지 |
 | 2026-04-09 | 하네스 초기 구성 | 전체 | 에이전트 4종 + 오케스트레이터 생성 |

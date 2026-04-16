@@ -172,6 +172,61 @@ def _try_kordoc_form(hwpx_path: str) -> dict | None:
     return None
 
 
+def extract_guide_table_text(hwpx_path: str, table_index: int) -> dict:
+    """hwpx_handler의 read-table을 호출하여 작성요령 테이블의 전체 텍스트를 추출"""
+    handler_path = str(Path(__file__).parent.parent / "skill" / "hwpx_handler.py")
+    try:
+        result = subprocess.run(
+            [sys.executable, handler_path, "read-table", hwpx_path,
+             "--table", str(table_index), "--json"],
+            capture_output=True, text=True, timeout=15,
+        )
+        if result.returncode != 0 or not result.stdout.strip():
+            return {}
+        data = json.loads(result.stdout)
+        cells = data.get("cells", [])
+    except (subprocess.TimeoutExpired, FileNotFoundError, json.JSONDecodeError):
+        return {}
+
+    all_texts = []
+    bullet_items = []
+    for cell in cells:
+        text = cell.get("text", "").strip()
+        if not text:
+            continue
+        all_texts.append(text)
+        for line in text.split("\n"):
+            line = line.strip()
+            if not line:
+                continue
+            # ㅇ, -, *, · 등 bullet으로 시작하는 항목을 개별 추출
+            if re.match(r'^[ㅇ○◦\-\*·•▶►☞]', line):
+                clean = re.sub(r'^[ㅇ○◦\-\*·•▶►☞]\s*', '', line).strip()
+                if clean and len(clean) > 5:
+                    bullet_items.append(clean)
+
+    full_text = "\n".join(all_texts)
+    return {
+        "full_text": full_text,
+        "bullet_items": bullet_items,
+    }
+
+
+def detect_clickhere_fields(hwpx_path: str) -> list:
+    """hwpx_handler의 detect_fields를 호출하여 누름틀 필드 목록 추출"""
+    handler_path = str(Path(__file__).parent.parent / "skill" / "hwpx_handler.py")
+    try:
+        result = subprocess.run(
+            [sys.executable, handler_path, "detect-fields", hwpx_path, "--json"],
+            capture_output=True, text=True, timeout=15,
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            return json.loads(result.stdout)
+    except (subprocess.TimeoutExpired, FileNotFoundError, json.JSONDecodeError):
+        pass
+    return []
+
+
 def generate_template_map(hwpx_path: str, kordoc_json_path: str = None) -> dict:
     """양식 HWPX를 분석하여 template_map 초안 생성"""
     tables = run_hwpx_handler(hwpx_path)
@@ -181,6 +236,8 @@ def generate_template_map(hwpx_path: str, kordoc_json_path: str = None) -> dict:
         "source_file": Path(hwpx_path).name,
         "tables": {},
         "guide_tables": [],
+        "guide_table_contents": {},
+        "clickhere_fields": [],
         "writing_order": [],
     }
 
@@ -206,6 +263,22 @@ def generate_template_map(hwpx_path: str, kordoc_json_path: str = None) -> dict:
 
         template_map["tables"][t_key] = t_entry
 
+    # 작성요령 테이블에서 전체 텍스트 추출
+    for guide_idx in template_map["guide_tables"]:
+        guide_content = extract_guide_table_text(hwpx_path, guide_idx)
+        if guide_content.get("full_text"):
+            # narrative_sections에서 연결된 섹션 이름 찾기
+            linked_section = ""
+            t_key = f"T{guide_idx}"
+            t_data = template_map["tables"].get(t_key, {})
+            purpose = t_data.get("purpose", "")
+
+            template_map["guide_table_contents"][str(guide_idx)] = {
+                "linked_section": linked_section,
+                "full_text": guide_content["full_text"],
+                "bullet_items": guide_content["bullet_items"],
+            }
+
     if kordoc_json_path:
         merge_kordoc_fields(template_map, kordoc_json_path)
     else:
@@ -222,7 +295,54 @@ def generate_template_map(hwpx_path: str, kordoc_json_path: str = None) -> dict:
             finally:
                 Path(tmp_path).unlink(missing_ok=True)
 
+    # 누름틀(ClickHere) 필드 감지
+    clickhere = detect_clickhere_fields(hwpx_path)
+    if clickhere:
+        template_map["clickhere_fields"] = [
+            {"name": f["name"], "guide": f["guide"], "field_type": f["field_type"]}
+            for f in clickhere
+        ]
+
     return template_map
+
+
+def enrich_sections_template(sections_template_path: str, template_map_path: str):
+    """기존 sections_template.json에 template_map의 guide_table_contents를 매칭하여
+    writing_guide_full 필드를 자동 추가한다.
+
+    Args:
+        sections_template_path: sections_*.json 파일 경로
+        template_map_path: template_map_*.json 파일 경로 (guide_table_contents 포함)
+    """
+    with open(sections_template_path, 'r', encoding='utf-8') as f:
+        sections = json.load(f)
+    with open(template_map_path, 'r', encoding='utf-8') as f:
+        tmap = json.load(f)
+
+    guide_contents = tmap.get("guide_table_contents", {})
+    narrative_sections = tmap.get("narrative_sections", [])
+
+    # header_keyword → guide_table index 매핑
+    keyword_to_guide = {}
+    for ns in narrative_sections:
+        kw = ns.get("header_keyword", "")
+        gt = ns.get("guide_table")
+        if kw and gt is not None:
+            keyword_to_guide[kw] = str(gt)
+
+    enriched = 0
+    for section in sections.get("sections", []):
+        header_kw = section.get("header_keyword", "")
+        guide_idx = keyword_to_guide.get(header_kw)
+        if guide_idx and guide_idx in guide_contents:
+            gc = guide_contents[guide_idx]
+            section["writing_guide_full"] = gc.get("full_text", "")
+            enriched += 1
+
+    with open(sections_template_path, 'w', encoding='utf-8') as f:
+        json.dump(sections, f, ensure_ascii=False, indent=2)
+
+    return enriched
 
 
 def main():
@@ -234,6 +354,8 @@ def main():
                         help="출력 JSON 파일 경로")
     parser.add_argument("--kordoc-json", help="kordoc parse_form 결과 JSON 파일 (선택)")
     parser.add_argument("--handler", help="hwpx_handler.py 경로 (기본: skill/hwpx_handler.py)")
+    parser.add_argument("--enrich-sections", metavar="SECTIONS_JSON",
+                        help="기존 sections_template.json에 writing_guide_full 추가")
     args = parser.parse_args()
 
     template_map = generate_template_map(args.hwpx, args.kordoc_json)
@@ -250,6 +372,17 @@ def main():
         for t in template_map["tables"].values()
     )
     print(f"  감지된 편집 가능 필드: {total_fields}개")
+    gc_count = len(template_map.get("guide_table_contents", {}))
+    if gc_count:
+        print(f"  작성요령 텍스트 추출: {gc_count}개 테이블")
+    ch_count = len(template_map.get("clickhere_fields", []))
+    if ch_count:
+        print(f"  누름틀(ClickHere) 필드: {ch_count}개")
+
+    # sections_template.json에 writing_guide_full 자동 추가
+    if args.enrich_sections:
+        enriched = enrich_sections_template(args.enrich_sections, args.output)
+        print(f"  sections_template 보강: {enriched}개 섹션에 writing_guide_full 추가")
 
 
 if __name__ == "__main__":

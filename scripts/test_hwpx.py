@@ -310,6 +310,45 @@ def check_images(hwpx_path, r):
                f'BinData 없음: {", ".join(orphan_manifest)}')
 
 
+def check_rhwp(hwpx_path, r):
+    """@rhwp/core WASM 파서로 실제 파싱 + 렌더링 가능 여부 검증"""
+    import subprocess as _sp
+    script = Path(__file__).parent / 'validate_rhwp.mjs'
+    if not script.exists():
+        r.warn('[RHWP] validate_rhwp.mjs 없음 — 건너뜀')
+        return
+
+    try:
+        proc = _sp.run(
+            ['node', str(script), str(hwpx_path), '--json'],
+            capture_output=True, text=True, timeout=30,
+        )
+    except FileNotFoundError:
+        r.warn('[RHWP] node 없음 — rhwp 검증 건너뜀')
+        return
+    except _sp.TimeoutExpired:
+        r.warn('[RHWP] 타임아웃 (30초)')
+        return
+
+    if proc.returncode == 2:
+        r.warn('[RHWP] @rhwp/core 미설치 — npm install 실행 필요', proc.stderr.strip()[:120])
+        return
+
+    import json as _json
+    try:
+        result = _json.loads(proc.stdout)
+    except (_json.JSONDecodeError, ValueError):
+        stderr_short = (proc.stderr or proc.stdout or '').strip()[:200]
+        r.warn('[RHWP] 결과 파싱 실패', stderr_short)
+        return
+
+    if result.get('ok'):
+        r.ok('[RHWP] rhwp 파싱+렌더링 성공', f'{result["pages"]}페이지, SVG {result["svg_length"]}바이트')
+    else:
+        for err in result.get('errors', []):
+            r.fail('[RHWP] ' + err)
+
+
 def check_diff(hwpx_path, orig_path, r):
     """원본 대비 변경 검사 (--orig 제공 시): linesegarray + 변경률"""
     if not HAS_LXML:
@@ -381,7 +420,7 @@ def check_diff(hwpx_path, orig_path, r):
 # 메인
 # ─────────────────────────────────────────────────────────────
 
-def validate(hwpx_path, orig_path=None):
+def validate(hwpx_path, orig_path=None, use_rhwp=False):
     print(f'\nHWPX 검증: {hwpx_path}')
     if orig_path:
         print(f'원본 비교: {orig_path}')
@@ -400,6 +439,9 @@ def validate(hwpx_path, orig_path=None):
         check_required_ns_declarations(hwpx_path, r)
         check_charpr(hwpx_path, r)
         check_images(hwpx_path, r)
+
+        if use_rhwp:
+            check_rhwp(hwpx_path, r)
 
         if orig_path:
             if not Path(orig_path).exists():
@@ -434,9 +476,11 @@ def main():
     parser.add_argument('hwpx', help='검증할 HWPX 파일 경로')
     parser.add_argument('--orig', metavar='원본.hwpx',
                         help='원본 양식 파일 (diff 기반 linesegarray 검사용)')
+    parser.add_argument('--rhwp', action='store_true',
+                        help='@rhwp/core WASM 파서로 파싱+렌더링 검증 (node 필요)')
     args = parser.parse_args()
 
-    exit_code = validate(args.hwpx, args.orig)
+    exit_code = validate(args.hwpx, args.orig, use_rhwp=args.rhwp)
     sys.exit(0 if exit_code == 0 else 1)
 
 

@@ -984,6 +984,148 @@ class HwpxHandler:
         return True
 
     # ================================================================
+    # ClickHere Field Detection / Fill (누름틀)
+    # ================================================================
+
+    def detect_fields(self, section_idx=0):
+        """누름틀(ClickHere) 필드를 감지하여 목록으로 반환.
+
+        HWPX에서 누름틀은 <hp:fieldBegin>...<hp:fieldEnd> 쌍 또는
+        <hp:ctrl> 기반으로 존재한다. 두 형태를 모두 탐색.
+
+        Returns:
+            list[dict]: [{name, guide, value, field_type, location}]
+        """
+        tree = self.section_trees.get(section_idx)
+        if tree is None:
+            return []
+
+        root = tree.getroot()
+        fields = []
+
+        # Pattern 1: <hp:fieldBegin type="CLICK_HERE"> ... <hp:fieldEnd>
+        for fb in root.iter(f'{HP}fieldBegin'):
+            ftype = fb.get('type', '')
+            if ftype not in ('CLICK_HERE', 'ClickHere', 'clickHere'):
+                continue
+            name = fb.get('name', '')
+            guide = fb.get('instId', '')
+            command = fb.get('command', '')
+
+            # guide text from command: "Name:xxx\x00Guide:yyy\x00"
+            guide_text = ''
+            if command:
+                for part in command.split('\x00'):
+                    if part.startswith('Guide:'):
+                        guide_text = part[6:]
+                    elif part.startswith('Name:') and not name:
+                        name = part[5:]
+
+            # value: text between fieldBegin and fieldEnd in same paragraph
+            value = ''
+            parent_p = fb.getparent()
+            if parent_p is not None:
+                collecting = False
+                for elem in parent_p.iter():
+                    if elem is fb:
+                        collecting = True
+                        continue
+                    if elem.tag == f'{HP}fieldEnd':
+                        break
+                    if collecting and elem.tag == f'{HP}t' and elem.text:
+                        value += elem.text
+
+            fields.append({
+                'name': name,
+                'guide': guide_text,
+                'value': value.strip(),
+                'field_type': 'CLICK_HERE',
+                'location': {
+                    'section': section_idx,
+                    'command': command[:80] if command else '',
+                },
+            })
+
+        # Pattern 2: <hp:ctrl> with ctrlId containing click-here markers
+        for ctrl in root.iter(f'{HP}ctrl'):
+            ctrl_id = ctrl.get('ctrlId', '')
+            if ctrl_id not in ('clck', '%clk'):
+                continue
+            name = ctrl.get('name', '')
+            fields.append({
+                'name': name,
+                'guide': '',
+                'value': '',
+                'field_type': 'CLICK_HERE_CTRL',
+                'location': {'section': section_idx, 'ctrlId': ctrl_id},
+            })
+
+        return fields
+
+    def fill_field(self, name, value, section_idx=0):
+        """이름으로 누름틀 필드를 찾아 값을 설정.
+
+        Returns:
+            bool: 필드를 찾아 값을 설정했으면 True
+        """
+        tree = self.section_trees.get(section_idx)
+        if tree is None:
+            return False
+
+        root = tree.getroot()
+
+        for fb in root.iter(f'{HP}fieldBegin'):
+            ftype = fb.get('type', '')
+            if ftype not in ('CLICK_HERE', 'ClickHere', 'clickHere'):
+                continue
+
+            field_name = fb.get('name', '')
+            command = fb.get('command', '')
+            if command:
+                for part in command.split('\x00'):
+                    if part.startswith('Name:') and not field_name:
+                        field_name = part[5:]
+
+            if field_name != name:
+                continue
+
+            parent_p = fb.getparent()
+            if parent_p is None:
+                continue
+
+            # Find and replace text between fieldBegin and fieldEnd
+            collecting = False
+            first_t = None
+            extra_runs = []
+            for elem in list(parent_p.iter()):
+                if elem is fb:
+                    collecting = True
+                    continue
+                if elem.tag == f'{HP}fieldEnd':
+                    break
+                if collecting and elem.tag == f'{HP}t':
+                    if first_t is None:
+                        first_t = elem
+                    else:
+                        extra_runs.append(elem)
+
+            if first_t is not None:
+                first_t.text = value
+                for extra in extra_runs:
+                    run_parent = extra.getparent()
+                    if run_parent is not None:
+                        run_parent.remove(extra)
+
+            # Clear linesegarray
+            for lsa in parent_p.findall(f'{HP}linesegarray'):
+                parent_p.remove(lsa)
+            etree.SubElement(parent_p, f'{HP}linesegarray')
+
+            return True
+
+        return False
+
+    # ================================================================
     # analyze
     # ================================================================
 
@@ -1047,6 +1189,45 @@ def cmd_analyze(args):
     handler.extract()
     table_filter = args.table if hasattr(args, 'table') and args.table is not None else None
     handler.analyze(table_filter=table_filter, show_all_rows=getattr(args, 'all_rows', False))
+
+    # 누름틀 필드 요약
+    fields = handler.detect_fields()
+    if fields:
+        print(f"\n{'='*60}")
+        print(f"누름틀(ClickHere) 필드: {len(fields)}개")
+        print(f"{'='*60}")
+        for f in fields:
+            val_preview = f['value'][:30] + '...' if len(f['value']) > 30 else f['value']
+            guide_info = f'  안내: "{f["guide"]}"' if f['guide'] else ''
+            print(f"  [{f['field_type']}] name=\"{f['name']}\" value=\"{val_preview}\"{guide_info}")
+
+    handler.cleanup()
+
+
+def cmd_detect_fields(args):
+    handler = HwpxHandler(args.hwpx_file)
+    handler.extract()
+    fields = handler.detect_fields()
+    if args.json:
+        print(json.dumps(fields, ensure_ascii=False, indent=2))
+    else:
+        if not fields:
+            print("누름틀 필드 없음")
+        else:
+            print(f"누름틀 필드 {len(fields)}개:")
+            for f in fields:
+                print(f"  name=\"{f['name']}\" type={f['field_type']} value=\"{f['value'][:40]}\"")
+    handler.cleanup()
+
+
+def cmd_fill_field(args):
+    handler = HwpxHandler(args.hwpx_file)
+    handler.extract()
+    if handler.fill_field(args.name, args.value):
+        handler.save(args.output)
+        print(f"필드 \"{args.name}\" = \"{args.value[:30]}...\"")
+    else:
+        print(f"필드 \"{args.name}\" 없음", file=sys.stderr)
     handler.cleanup()
 
 
@@ -1260,6 +1441,18 @@ def main():
     p.add_argument('--width', type=float, default=None, help='표시 너비 (cm)')
     p.add_argument('--height', type=float, default=None, help='표시 높이 (cm)')
 
+    # detect-fields
+    p = subparsers.add_parser('detect-fields', help='누름틀(ClickHere) 필드 감지')
+    p.add_argument('hwpx_file')
+    p.add_argument('--json', '-j', action='store_true')
+
+    # fill-field
+    p = subparsers.add_parser('fill-field', help='누름틀 필드에 값 설정')
+    p.add_argument('hwpx_file')
+    p.add_argument('output')
+    p.add_argument('--name', '-n', required=True, help='필드 이름')
+    p.add_argument('--value', '-v', required=True, help='설정할 값')
+
     # insert-text (NEW)
     p = subparsers.add_parser('insert-text', help='테이블 밖에 텍스트 단락 삽입')
     p.add_argument('hwpx_file')
@@ -1280,6 +1473,8 @@ def main():
         'remove-guides': cmd_remove_guides,
         'insert-image': cmd_insert_image,
         'insert-text': cmd_insert_text,
+        'detect-fields': cmd_detect_fields,
+        'fill-field': cmd_fill_field,
     }
 
     if args.command in commands:

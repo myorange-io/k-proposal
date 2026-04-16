@@ -49,6 +49,13 @@ if command -v npx &>/dev/null; then
     else
         warn "kordoc 설치 실패. HWP 파싱은 수동 HWPX 변환으로 대체됩니다."
     fi
+
+    # @rhwp/core (HWPX/HWP WASM 검증용)
+    if [ -f "$SCRIPT_DIR/package.json" ]; then
+        info "@rhwp/core 설치 중 (HWPX 빌드 검증용)..."
+        (cd "$SCRIPT_DIR" && npm install 2>/dev/null) && ok "@rhwp/core 설치 완료" || \
+            warn "@rhwp/core 설치 실패. --rhwp 검증 비활성."
+    fi
 else
     warn "Node.js/npx를 찾을 수 없습니다."
     warn "kordoc(HWP/PDF 고급 파싱)을 사용하려면 Node.js를 먼저 설치하세요."
@@ -150,6 +157,7 @@ if [ "$KORDOC_AVAILABLE" = true ]; then
     echo "    ✓ kordoc: HWP/PDF/XLSX/DOCX 파싱"
     echo "    ✓ kordoc MCP: AI 에이전트 직접 호출"
     echo "    ✓ 양식 자동 인식, 문서 비교"
+    echo "    ✓ @rhwp/core: HWPX 빌드 결과 WASM 검증 (--rhwp)"
 else
     echo "  포함된 기능:"
     echo "    ✓ HWPX 파싱/채우기/행추가"

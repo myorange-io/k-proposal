@@ -123,6 +123,35 @@ python scripts/auto_template_map.py "양식.hwpx" -o template_map_draft.json
 
 산출물: 테이블 인덱스, 행/열, 셀 매핑(빈셀 ✎), 병합 정보, 작성요령 테이블 위치
 
+### 작성요령 텍스트 자동 추출
+
+`auto_template_map.py`는 작성요령(guide) 테이블의 **전체 텍스트**를 자동 추출하여 `guide_table_contents` 키에 저장한다:
+
+```bash
+python scripts/auto_template_map.py "양식.hwpx" -o template_map_draft.json
+```
+
+결과물의 `guide_table_contents`에 각 작성요령 테이블의 원문이 포함된다:
+
+```json
+{
+  "guide_table_contents": {
+    "5": {
+      "full_text": "ㅇ 시장현황 및 문제점을 시장 및 기술트렌드 측면에서 기술...",
+      "bullet_items": ["시장현황 및 문제점을 시장 및 기술트렌드 측면에서 기술", ...]
+    }
+  }
+}
+```
+
+이 데이터는 `sections_template.json`의 `writing_guide_full` 필드로 전달되어, `/proposal-write`가 양식이 요구하는 구체적 항목을 빠짐없이 커버하도록 한다.
+
+**sections_template 보강 (선택):**
+```bash
+python scripts/auto_template_map.py "양식.hwpx" -o template_map.json \
+  --enrich-sections templates/tips/sections_연구개발계획서_template.json
+```
+
 ---
 
 ## Step 3: 준비자료 생성
@@ -132,6 +161,7 @@ python scripts/auto_template_map.py "양식.hwpx" -o template_map_draft.json
 - **지원 유형** + **주관기관 프로파일**
 - 예산규칙(비목별 한도 포함)
 - 양식 테이블맵
+- **작성요령 요약** (각 서술형 섹션에 대한 양식의 구체적 요구사항)
 - 광탈 패턴 목록, 지역성 포인트
 
 ### 유형 → 템플릿 경로 매핑
