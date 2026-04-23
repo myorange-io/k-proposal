@@ -637,33 +637,34 @@ def generate_openai_image(prompt, output_path, style=None, api_key=None,
         return False
 
     style_prompts = {
-        'diagram':    'Technical architecture diagram. Rounded-corner boxes connected by arrows. Light gray box backgrounds with dark text. Orange or blue accent for key nodes. White background. Large, clear labels inside boxes.',
-        'infographic':'Business infographic. Data represented with icons and large bold numbers. Card-based layout. Orange/blue accents. Small clear labels. White or light beige background.',
-        'flowchart':  'Process flowchart. Rounded-corner boxes and arrows. Left-to-right flow. Current step in orange, others in gray. Short keyword labels. White background.',
-        'chart':      'Business chart. Orange/blue color palette. Clean axes and labels. Values shown on data points. White background. Large bold title.',
-        'timeline':   'Horizontal timeline. Orange line with year/period markers. Each event as a card below the line. White background. Short keyword text.',
-        'service':    'Service overview. 3-4 cards arranged horizontally. Each card: icon + title + one-line description. Light gray card background with rounded corners. Orange or blue icons.',
-        'comparison': 'Comparison table. Left column: item names, right 2 columns: subjects. Header with orange background and white text. Clean grid. White background.',
+        'diagram':    '기술 아키텍처 다이어그램. 둥근 모서리 박스들을 화살표로 연결. 박스 배경은 연한 회색, 텍스트는 진한 검정. 핵심 노드는 오렌지 또는 파랑으로 강조. 흰 배경. 박스 안 라벨은 크고 선명한 한글로.',
+        'infographic':'비즈니스 인포그래픽. 아이콘과 큰 숫자로 데이터 표현. 카드형 레이아웃. 오렌지/파랑 강조색. 짧고 명확한 한글 라벨. 흰색 또는 연한 베이지 배경.',
+        'flowchart':  '프로세스 플로우차트. 둥근 모서리 박스와 화살표. 좌→우 흐름. 현재 단계는 오렌지, 나머지는 회색. 짧은 한글 키워드 라벨. 흰 배경.',
+        'chart':      '비즈니스 차트. 오렌지/파랑 팔레트. 축과 라벨은 깔끔한 한글. 데이터 포인트에 수치 표시. 흰 배경. 큰 굵은 한글 제목.',
+        'timeline':   '가로 타임라인. 오렌지 선 위에 연도/시기 마커. 각 이벤트는 선 아래 카드로 배치. 흰 배경. 짧은 한글 키워드 텍스트.',
+        'service':    '서비스 개요. 3-4개 카드를 가로로 배치. 각 카드: 아이콘 + 한글 제목 + 한 줄 한글 설명. 둥근 모서리의 연한 회색 카드 배경. 오렌지/파랑 아이콘.',
+        'comparison': '비교표. 왼쪽 컬럼: 항목명, 오른쪽 2컬럼: 비교 대상. 헤더는 오렌지 배경에 흰 한글 글씨. 깔끔한 그리드. 흰 배경.',
+        'swot':       'SWOT 분석 매트릭스. 2x2 그리드 구조. 좌상=강점(Strengths), 우상=약점(Weaknesses), 좌하=기회(Opportunities), 우하=위협(Threats). 각 사분면은 다른 연한 배경색(녹·적·청·주황 톤)에 한글 제목과 3-4개 한글 불릿 항목. 굵은 한글 제목, 선명한 라벨. 흰 외곽 배경.',
     }
 
     design_guide = """
-[Design system — apply strictly]
-- Colors: orange (#FF6D00) accent, black (#1A1A1A) text, white (#FFFFFF) background
-- Minimal, generous whitespace, rounded corner cards, grid alignment
-- Clean, trustworthy SaaS aesthetic
+[디자인 시스템 — 엄격히 적용]
+- 색상: 오렌지(#FF6D00) 강조, 검정(#1A1A1A) 텍스트, 흰색(#FFFFFF) 배경
+- 여백 충분, 둥근 모서리 카드, 그리드 정렬, 미니멀
+- 깔끔하고 신뢰감 있는 SaaS 톤
 
-[Text rendering — critical]
-- All text must be sharp, large, and high-contrast
-- Prefer English labels; if Korean is required, use short common words only
-- Minimize text; use short keywords/labels only
-- No text overlap with other visual elements
+[텍스트 렌더링 — 필수]
+- 모든 텍스트는 선명하고 크며 대비가 높아야 함
+- 라벨은 한국어(한글)로 작성 (정부지원사업 사업계획서용)
+- 텍스트는 짧은 키워드/라벨 위주로 최소화
+- 텍스트끼리, 또는 다른 시각 요소와 겹치지 않게
 """
 
     full_prompt = f"{prompt}\n\n{design_guide}"
     if style and style in style_prompts:
-        full_prompt += f"\nStyle: {style_prompts[style]}"
+        full_prompt += f"\n스타일: {style_prompts[style]}"
     else:
-        full_prompt += "\nStyle: Professional business document visual. White background, clean readable design."
+        full_prompt += "\n스타일: 정부지원사업 사업계획서용 전문 비즈니스 시각자료. 흰 배경, 깔끔하고 가독성 높은 한글 디자인."
 
     try:
         from openai import OpenAI
