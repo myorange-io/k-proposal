@@ -1,13 +1,15 @@
 ---
 name: proposal-research
-description: "회사 자료 분석 + 시장 리서치 + 경쟁사 분석 + KIPRIS 특허 검색 + 출처 URL 검증. '시장 리서치', '경쟁사 분석', 'KIPRIS 검색', '회사 자료 분석' 요청 시 사용."
+description: "회사 자료 분석 + 시장 리서치 + 경쟁사 분석 + KIPRIS 특허 검색 + 출처 URL 검증 + 사용자 승인 게이트. '시장 리서치', '경쟁사 분석', 'KIPRIS 검색', '회사 자료 분석' 요청 시 사용. 인용 품질을 Tier·신선도·교차검증으로 강화하고 사용자 승인 후에만 writer로 전달."
 ---
 
-# proposal-research — 리서치 + KIPRIS + 출처 검증
+# proposal-research — 리서치 + KIPRIS + 출처 검증 + 승인 게이트
 
 ## 핵심 역할
 
-회사 참고자료에서 핵심 데이터를 추출하고, 시장 규모·경쟁사·정책 동향을 검색하고, KIPRIS 특허 검색을 수행하고, 모든 인용의 출처 URL을 검증한다.
+회사 참고자료에서 핵심 데이터를 추출하고, 시장 규모·경쟁사·정책 동향을 검색하고, KIPRIS 특허 검색을 수행하고, 모든 인용의 출처 URL을 검증하고, **사용자 승인 게이트**를 거쳐 승인된 인용만 다음 단계로 전달한다.
+
+> 모든 품질 룰(Tier 위계 / 신선도 / 교차검증 / 차단 도메인 / 광탈 패턴 / KIPRIS 5단계 / 다중 검색 / 공식 채널 우선순위)은 [`references/research-quality-rules.md`](../../../references/research-quality-rules.md)에 정의되어 있으니 작업 전 반드시 정독한다.
 
 ## 단독 사용
 
@@ -18,9 +20,11 @@ KIPRIS 특허 검색해줘
 이 회사 자료 분석해줘
 ```
 
+**단독 호출 시에도 Step 4 사용자 승인 게이트는 동일하게 실행된다.** 승인된 인용은 `_workspace/01_researcher/approved_citations.json`에 저장되며, 이후 `/proposal-write`를 별도 호출할 때 자동 로드된다.
+
 ## 파이프라인 사용
 
-`/proposal-analyze` 다음에 자동 호출된다.
+`/proposal-analyze` 다음에 자동 호출된다. Step 4 게이트 통과 후 `/proposal-write`로 진행.
 
 ---
 
@@ -49,62 +53,203 @@ KIPRIS 특허 검색해줘
 
 ---
 
-## Step 2: 시장 리서치
+## Step 2: 시장 리서치 (품질 강화)
 
 ### 작업 원칙
 1. 모든 외부 데이터에 **출처 3요소** (기관명 + 발행연도 + URL) 확보
-2. WebFetch로 URL 접속하여 **인용 수치가 원문에 실존하는지** 검증
-3. 검증 불가 데이터는 사실처럼 쓰지 않는다
-4. 검색 결과의 수치를 다른 맥락에 전용하지 않는다
+2. **Tier 위계**(`research-quality-rules.md` §1)에 따라 분류 — 핵심 정량은 T1~T3에서, **언론·블로그·보도자료 인용 금지**
+3. **데이터 신선도 룰**(§2) 준수 — ICT/AI/바이오 ≤2년, 일반 ≤3년, 거시지표 ≤5년
+4. **교차검증**(§3) 의무 — 핵심 정량은 독립된 2개+ 출처에서 ±10% 이내 일치 시 채택
+5. WebFetch로 URL 접속하여 인용 수치가 원문에 실존하는지 검증, **원문 스니펫 50자+ 보존**
+6. 검증 불가 데이터는 사실처럼 쓰지 않는다, 검색 결과의 수치를 다른 맥락에 전용하지 않는다
+
+### 1차 검색: 공식 채널 우선
+
+`research-quality-rules.md` §8에 따른 토픽별 1차 채널:
+
+```
+시장규모/성장률 → KOSIS + KOTRA + 한국은행 ECOS (T1·T2)
+경쟁사 매출    → DART 사업·반기보고서 (T1)
+정책·예산      → 기획재정부 예산서, 중기부·과기정통부 정책자료 페이지
+                 (정책 보도자료는 정부 사이트 원문에서만 사용 — 언론 기사 금지)
+산업통계       → SGIS, 공공데이터포털
+글로벌 동향    → Gartner/IDC/Statista (T3), OECD/World Bank
+```
+
+각 토픽별 `site:kosis.kr` `site:dart.fss.or.kr` `site:kotra.or.kr` 등 도메인 한정 검색을 1차 시도, 결과 부족 시에만 일반 WebSearch로 확장. 일반 WebSearch 결과는 §1 차단 도메인 리스트로 필터링한다.
+
+### 2차 검색: 다중 쿼리 전략
+
+토픽 1건당 **최소 4가지 쿼리 병렬 실행**(§7):
+1. 한국어 핵심 키워드
+2. 한국어 동의어 변형
+3. 영어 키워드 (글로벌 데이터)
+4. 공식 도메인 한정 (`site:` 연산자)
+
+결과 통합 → 차단 도메인 필터링 → Tier 정렬 → 신선도 필터 → 교차검증 후보 선정.
+
+### 시장규모 산출 (Top-down + Bottom-up 둘 다 필수)
+
+`research-quality-rules.md` §4 산식 템플릿을 그대로 적용. 셀 누락 시 reviewer 양식 게이트에서 차단된다.
+
+```markdown
+#### TAM (Top-down)
+- 산식: [산업 전체 매출] × [카테고리 비중]
+- 원자료: KOSIS [표명·지표코드] 또는 KOTRA [보고서명] (T1·T2 의무)
+- 가정: …
+
+#### SAM (Top-down × 필터)
+- 산식: TAM × [지역] × [세그먼트] × [규제] 필터
+- 가정 보수성 근거: …
+
+#### SOM (Bottom-up)
+- 산식: [타깃 고객 수] × [평균 단가(ASP)] × [3년차 침투율]
+- End-user 프로파일·단위경제 출처: …
+- 보수성 근거: …
+```
 
 ### 리서치 항목
-- TAM/SAM/SOM 시장규모 (Bottom-Up 산출 포함)
-- 시장 성장률 + CAGR + 출처
-- 경쟁사 제품/가격/매출/차별점
-- 정책·규제 동향 (국내외)
+- TAM/SAM/SOM 시장규모 (위 산식 강제)
+- 시장 성장률 + CAGR + 출처 (교차검증 적용)
+- 경쟁사 제품/가격/매출/차별점 (DART 우선)
+- 정책·규제 동향 (정부 사이트 원문)
 - 기술 트렌드
 
 ### 출처 검증 프로토콜
 
 모든 URL에 WebFetch 접속:
 1. 페이지 텍스트에서 인용 수치/문구 검색
-2. 판정: **PASS** / **MISMATCH** (원문 수치로 수정) / **FAIL** (대체 URL 재검색) / **OUTDATED** (최신으로 교체)
+2. **원문 스니펫(±50자)** 추출 후 source_verification.md에 보존
+3. 판정: **PASS** / **MISMATCH** (원문 수치로 수정) / **FAIL** (대체 URL 재검색) / **OUTDATED** (최신으로 교체)
+4. Tier 분류 부여
+5. 핵심 정량 수치는 교차검증 일치도 컬럼 채움
+
+### source_verification.md 컬럼 표준
+
+```
+| # | 카테고리 | 인용값 | Tier | 출처1 (URL) | 출처2 (URL) | 일치도 | 채택값 | 신선도 | 자동검증 | 원문 스니펫(50자+) |
+```
+
+### 광탈 패턴 자동 감지
+
+작성 후 `research-quality-rules.md` §5의 8개 패턴 self-check를 수행하고 발견 시 보강. 특히 §5-#4(언론·블로그 인용)는 무조건 삭제 + 재검색.
 
 ---
 
 ## Step 3: KIPRIS 특허 검색 (TIPS/R&D 과제 필수)
 
-TIPS 작성요령 2-3(연구개발 현황)에서 "키프리스 문장검색 유사도 60%+ 등록특허 10건 내외"를 요구한다.
+TIPS 작성요령 2-3(연구개발 현황)에서 "키프리스 문장검색 유사도 60%+ 등록특허 10건 내외"를 요구한다. 자의적 유사도 추정값을 폐지하고 **객관 지표 5단계 절차**로 전환.
+
+### 5단계 절차 (`research-quality-rules.md` §6)
+
+```
+Step 1: 핵심 기술 1~2문장 요약 → 키워드 3~5개 추출
+Step 2: KIPRIS 키워드 검색 → 청구항 일치도 가장 높은 모(母)특허 1건 식별
+Step 3: 모특허의 IPC/CPC 분류 코드 추출 → 분류 검색으로 기술군 전수 조망
+Step 4: 출원인 분석 → 산업 내 활동 주체(대기업/연구소/스타트업) 매핑
+Step 5: 패밀리 특허(다국 출원) 확인 → 시장 확장성 근거
+```
 
 ### 검색 절차
-1. 핵심 기술 설명을 1~2문장으로 요약
+1. 핵심 기술 1~2문장 요약
 2. WebSearch로 `site:kipris.or.kr` + 핵심 키워드 조합 검색
-3. 추가로 `"특허" + 기술 키워드` 조합으로 보완 검색
+3. 모특허 식별 후 IPC/CPC 분류 코드로 확장 검색
 4. 등록특허 10건 내외 수집 (출원 중 제외, 등록 완료만)
+5. 출원인 분포 + 패밀리 특허 정보 추가 수집
 
 ### 수집 항목 (건당)
 - 등록번호 (10-XXXX-XXXXXXX)
 - 특허명
 - 출원인
-- 유사도 추정 (60%+ 기준)
+- IPC/CPC 분류 코드
+- **청구항 키워드 매칭률** (키워드 N개 중 일치 개수 / N — 자의적 "65%" 추정 금지)
 - 본 과제와의 차이점 (1줄)
 
 ### 출력 형식
 
 ```markdown
-## KIPRIS 문장검색 결과
+## KIPRIS 검색 결과
 검색 문장: "(핵심 기술 설명 문장)"
+모특허: 10-XXXX-XXXXXXX (IPC: G06N, CPC: G06N3/02)
 
-| 순번 | 등록번호 | 특허명 | 출원인 | 유사도 | 본 과제와의 차이점 |
-|------|---------|--------|--------|--------|-----------------|
-| 1 | 10-... | ... | ... | 65% | ... |
+### 출원인 분포
+- 대기업 N건 / 연구소 N건 / 스타트업 N건
+
+### 패밀리 특허
+- 미국·일본·중국 출원 현황
+
+### 등록특허 10건
+
+| 순번 | 등록번호 | 특허명 | 출원인 | IPC/CPC | 매칭률 | 본 과제와의 차이점 |
+|------|---------|--------|--------|---------|--------|-----------------|
+| 1 | 10-... | ... | ... | G06N3/02 | 4/5 (80%) | ... |
 ```
+
+---
+
+## Step 4: 사용자 승인 게이트 (필수, 자동/협업/단독 호출 공통)
+
+Step 1–3에서 품질 보강된 인용을 **단일 채택표**로 정리해 사용자에게 제시한다. 승인되지 않은 항목은 `/proposal-write`에서 인용 금지.
+
+### 채택표 포맷 (Phase A 결과를 컬럼으로 노출)
+
+| # | 카테고리 | 인용 | Tier | 신선도 | 자동검증 | 일치도 | 출처 (≤2개 표시) | 결정 |
+|---|---------|-----|------|--------|---------|--------|----------------|-----|
+| 1 | 시장규모 | SaaS 5.2조 (2024) | T1 | OK | PASS | 2출처 ±3% | KOSIS / NIPA | ☐ |
+| 2 | 경쟁사  | A사 ARR 120억 | T1 | OK | MISMATCH→110억 | 1출처 | DART | ☐ |
+| 3 | 정책   | 중기부 R&D 4.7조 | T1 | OK | PASS | 2출처 ±0% | 예산서 / 정부 발표 | ☐ |
+| 4 | KIPRIS | 10-2023-0099999 (CPC G06N) | T1 | OK | — | — | KIPRIS | ☐ |
+
+각 행에 **원문 스니펫(50자+)을 함께 표시**해 사용자가 맥락을 즉시 확인할 수 있게 한다.
+
+### 사용자 결정 수집
+
+`AskUserQuestion`(또는 그에 상응하는 사용자 질의)으로 수집:
+
+> "위 표의 각 행에 대해 채택/제외/수정을 알려주세요.
+> 형식: `1:채택, 2:수정(110억), 3:제외, 4:채택`"
+
+### 산출물 갱신
+
+(a) `_workspace/01_researcher/source_verification.md` 하단에 승인 결과 append:
+
+```markdown
+## 사용자 승인 결과 (YYYY-MM-DD)
+| # | 결정 | 최종 인용 값 | writer 전달 |
+|---|------|------------|-----------|
+| 1 | 채택 | 5.2조 | YES |
+| 2 | 수정 | 110억 | YES (수정값) |
+| 3 | 제외 | — | NO ([사용자 미승인]) |
+```
+
+(b) 신규 파일 `_workspace/01_researcher/approved_citations.json`:
+
+```json
+{
+  "approved": [
+    {"id": 1, "category": "시장규모", "text": "SaaS 5.2조", "tier": "T1", "source_url": "...", "snippet": "...", "freshness": "2024"},
+    {"id": 2, "category": "경쟁사", "text": "A사 ARR 110억", "tier": "T1", "source_url": "...", "snippet": "...", "freshness": "2024", "modified_from": "120억"}
+  ],
+  "rejected_ids": [3],
+  "approved_at": "YYYY-MM-DD"
+}
+```
+
+### writer 전달 규약
+- **채택 항목만** `draft.md` / `draft_fill.json`에 인용 가능
+- **제외 항목 자리** → `[사용자 미승인 — 인용 보류]` 태그
+- **수정 항목** → 수정값으로 치환 후 인용
+- 인용 인라인에 **Tier·발행연도·출처 URL** 명기
+
+### 무응답·자동 모드 처리
+- 승인 게이트는 **자동 모드에서도 스킵 불가**
+- 사용자 무응답 시 보류, 임의 진행 금지
 
 ---
 
 ## 에이전트 호출
 
-Agent Teams 모드에서는 `researcher.md` 에이전트를 호출한다.
+Agent Teams 모드에서는 `researcher.md` 에이전트를 호출한다. 4개 sub-task(market-size / competitor / policy-trend / kipris-patent)로 병렬 실행. 승인 게이트는 **리드(orchestrator)가 직접 수행**하며 에이전트는 사용자와 직접 대화하지 않는다.
 
 ---
 
@@ -113,6 +258,9 @@ Agent Teams 모드에서는 `researcher.md` 에이전트를 호출한다.
 - WebSearch 결과 0건: 키워드 변형하여 1회 재검색. 재실패 시 "[데이터 미확보]" 태그
 - WebFetch 접속 불가: 대체 URL 1회 재검색. 실패 시 해당 인용 삭제
 - KIPRIS 결과 부족: 키워드를 상위 개념으로 확장. 최소 5건 확보 목표
+- 차단 도메인 결과만 수집됨: 도메인 한정 검색(`site:kosis.kr` 등)으로 재검색, T1 부재 시 "[T1 부재 — 사용자 확인 필요]" 태그로 게이트에 표시
+- 신선도 미달 자료만 수집됨: 최신 연도 키워드 추가 재검색, 실패 시 "[신선도 부족]" 태그로 게이트에 표시
+- 사용자 무응답: 보류 후 사용자에게 재요청, 자동 진행 금지
 
 ---
 
@@ -120,9 +268,11 @@ Agent Teams 모드에서는 `researcher.md` 에이전트를 호출한다.
 
 - **입력**: `_workspace/00_input/준비자료.md` + 회사 참고자료 파일
 - **출력**:
-  - `_workspace/01_researcher/market_research.md`
-  - `_workspace/01_researcher/competitor_analysis.md`
-  - `_workspace/01_researcher/source_verification.md`
-  - `_workspace/01_researcher/kipris_search.md`
+  - `_workspace/01_researcher/market_size.md` — TAM/SAM/SOM 산출 (sub-task)
+  - `_workspace/01_researcher/competitor.md` — 경쟁사 분석 (sub-task)
+  - `_workspace/01_researcher/policy_trend.md` — 정책·예산·규제 (sub-task)
+  - `_workspace/01_researcher/kipris.md` — KIPRIS 5단계 결과 (sub-task)
+  - `_workspace/01_researcher/source_verification.md` — 통합 검증 + 사용자 승인 결과
+  - `_workspace/01_researcher/approved_citations.json` — 사용자 승인 인용만 (Phase B 산출)
 - **이전 단계**: `/proposal-analyze`
-- **다음 단계**: `/proposal-write`
+- **다음 단계**: `/proposal-write` (단, Step 4 승인 게이트 통과 후)
