@@ -174,11 +174,16 @@ description: "사업계획서 초안 작성 + 휴먼라이징 + 시각자료 생
 | 대상 | 생성 방법 |
 |------|---------|
 | TAM/SAM/SOM 차트 | matplotlib bar/line |
-| 시스템 아키텍처 | OpenAI gpt-image-2(영문) 또는 mermaid |
-| 핵심 알고리즘 플로우 | mermaid 또는 OpenAI gpt-image-2 |
+| 시스템 아키텍처 | gpt-image-2(한글, style=diagram) 또는 mermaid |
+| 핵심 알고리즘 플로우 | mermaid 또는 gpt-image-2(한글, style=flowchart) |
 | 경쟁사 비교 레이더 | matplotlib radar |
 | 투자 로드맵 타임라인 | matplotlib timeline |
 | TRL 진행도 | matplotlib horizontal bar |
+| SWOT 분석 매트릭스 | gpt-image-2(한글, style=swot) |
+| 비즈니스 모델 캔버스 | gpt-image-2(한글, style=diagram, 9블록) |
+| 고객 여정 맵 (Before/After) | gpt-image-2(한글, style=service) |
+| 조직도 / R&R 매트릭스 | gpt-image-2(한글, style=diagram) 또는 mermaid |
+| 매출·재무 예측 차트 (3-5년) | matplotlib stacked_bar + line |
 
 브랜드 색상 자동 추출 (로고/소개서 이미지가 있을 때).
 
