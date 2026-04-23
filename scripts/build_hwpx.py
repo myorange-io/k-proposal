@@ -21,6 +21,12 @@ parser = argparse.ArgumentParser(description='HWPX 빌드')
 parser.add_argument('--base', default=BASE, help='프로젝트 디렉토리')
 parser.add_argument('--orig', default=ORIG, help='원본 양식 HWPX')
 parser.add_argument('--out', default=OUT, help='출력 HWPX')
+parser.add_argument('--audit-draft', metavar='PATH',
+                    help='빌드 후 완전성 감사를 수행할 초안 마크다운 경로')
+parser.add_argument('--audit-threshold', type=float, default=20.0,
+                    help='감사 통과 임계치 %% (기본 20.0)')
+parser.add_argument('--audit-strict', action='store_true',
+                    help='크리티컬 섹션이 하나라도 있으면 빌드 실패 처리')
 args, _ = parser.parse_known_args()
 BASE, ORIG, OUT = args.base, args.orig, args.out
 
@@ -267,3 +273,37 @@ with zipfile.ZipFile(tmp, 'w') as zfout:
             zfout.writestr(name, all_files[name])
 os.replace(tmp, OUT)
 print(f"\nHWPX 저장 완료: {OUT}")
+
+# ============================================================
+# 4단계: 초안↔HWPX 완전성 감사 (옵션)
+# ============================================================
+# 초안 경로가 주어진 경우에만 실행. sections.json/fill.json을 아무리 잘 채워도
+# 초안에 있던 내용이 중간에 누락될 수 있으므로, 최종 HWPX가 초안을 얼마나
+# 담고 있는지를 앵커 토큰 기반으로 감사한다.
+if args.audit_draft:
+    audit_script = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+                                'audit_completeness.py')
+    if not os.path.exists(audit_script):
+        print(f"\nWARN: audit_completeness.py 없음: {audit_script} — 감사 생략")
+    elif not os.path.exists(args.audit_draft):
+        print(f"\nWARN: 초안 파일 없음: {args.audit_draft} — 감사 생략")
+    else:
+        print("\n" + "=" * 60)
+        print("완전성 감사 실행")
+        print("=" * 60)
+        audit_cmd = [
+            sys.executable, audit_script,
+            '--draft', args.audit_draft,
+            '--hwpx', OUT,
+            '--threshold', str(args.audit_threshold),
+        ]
+        if args.audit_strict:
+            audit_cmd.append('--strict')
+        result = subprocess.run(audit_cmd)
+        if result.returncode == 1:
+            print("\n⚠️  감사 실패: 누락된 내용이 임계치를 초과합니다.")
+            print("   → writer가 fill JSON 또는 _fill_body 스크립트에 해당 섹션을 추가해야 합니다.")
+            sys.exit(1)
+        elif result.returncode != 0:
+            print(f"\n감사 스크립트 오류 (exit={result.returncode})")
+            sys.exit(result.returncode)
