@@ -32,9 +32,14 @@ else
     exit 1
 fi
 
-$PIP install lxml python-docx matplotlib Pillow 2>/dev/null && ok "Python 의존성 설치 완료" || {
-    warn "일부 패키지 설치 실패. 수동 설치: pip install lxml python-docx matplotlib Pillow"
+$PIP install lxml python-docx matplotlib Pillow openai 2>/dev/null && ok "Python 의존성 설치 완료" || {
+    warn "일부 패키지 설치 실패. 수동 설치: pip install lxml python-docx matplotlib Pillow openai"
 }
+
+if [ -z "$OPENAI_API_KEY" ]; then
+    warn "OPENAI_API_KEY가 설정되지 않았습니다. gpt-image-2 이미지 생성을 쓰려면 환경변수 설정 필요."
+    warn "  발급: https://platform.openai.com/api-keys"
+fi
 
 # ─── 2. Node.js / kordoc 확인 및 설치 ───
 
