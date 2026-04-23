@@ -223,7 +223,7 @@ k-proposal/
 │   └── skills/               # 6개 스킬 (orchestrator + 5개 파이프라인)
 ├── skill/                    # 핵심 도구
 │   ├── hwpx_handler.py       #   HWPX 분석/채우기/이미지삽입/누름틀 필드
-│   ├── visual_gen.py         #   시각자료 (matplotlib + Gemini)
+│   ├── visual_gen.py         #   시각자료 (matplotlib + OpenAI gpt-image-2)
 │   └── kordoc_bridge.py      #   kordoc CLI 브릿지
 ├── scripts/                  # 빌드 파이프라인
 │   ├── build_hwpx.py         #   8단계 HWPX 빌드
@@ -279,7 +279,7 @@ python scripts/test_hwpx.py "제출용.hwpx" --rhwp                      # + WAS
 
 ```bash
 python skill/visual_gen.py chart config.json -o chart.png
-python skill/visual_gen.py gemini "System architecture diagram" -o arch.png
+python skill/visual_gen.py openai "System architecture diagram" -o arch.png --style diagram
 ```
 
 </details>
@@ -295,7 +295,7 @@ python skill/visual_gen.py gemini "System architecture diagram" -o arch.png
 | 구분 | 패키지 | 용도 |
 |------|--------|------|
 | Python | `lxml`, `python-docx`, `matplotlib`, `Pillow` | HWPX 조작, 시각자료 (필수) |
-| Python | `google-genai` | Gemini 이미지 생성 (선택) |
+| Python | `openai` | OpenAI `gpt-image-2` 이미지 생성 (선택, `OPENAI_API_KEY` 필요) |
 | npm | `kordoc-mcp` | HWP/PDF 파싱 MCP 서버 (권장) |
 | npm | `@rhwp/core` | HWPX/HWP WASM 파싱 검증 (선택) |
 

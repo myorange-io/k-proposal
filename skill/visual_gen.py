@@ -5,7 +5,7 @@
 - 한글 폰트 자동 탐색 (Pretendard 우선)
 - --count N: 색상 팔레트 변형 N개 생성
 - 차트 타입: bar, horizontal_bar, line, area, pie, donut, stacked_bar, grouped_bar, infographic
-- Gemini 이미지 생성 (variants 지원)
+- OpenAI gpt-image-2 이미지 생성 (variants 지원)
 - Mermaid 다이어그램
 """
 
@@ -607,16 +607,35 @@ def generate_variants(chart_config, output_path, count=3, brand_image=None):
 
 
 # ─────────────────────────────────────────────
-# Gemini 이미지 생성
+# OpenAI gpt-image-2 이미지 생성
 # ─────────────────────────────────────────────
-def generate_gemini_image(prompt, output_path, style=None, api_key=None, count=1):
-    key = api_key or os.environ.get('GEMINI_API_KEY') or os.environ.get('GOOGLE_API_KEY')
+OPENAI_IMAGE_MODEL = 'gpt-image-2'
+OPENAI_VALID_SIZES = {
+    'auto', '1024x1024', '1536x1024', '1024x1536',
+    '2048x2048', '2048x1152', '3840x2160', '2160x3840',
+}
+OPENAI_VALID_QUALITIES = {'auto', 'low', 'medium', 'high'}
+OPENAI_VALID_FORMATS = {'png', 'jpeg', 'webp'}
+
+
+def generate_openai_image(prompt, output_path, style=None, api_key=None,
+                          count=1, size='auto', quality='auto', output_format='png'):
+    key = api_key or os.environ.get('OPENAI_API_KEY')
     if not key:
-        print("오류: GEMINI_API_KEY 환경변수를 설정하세요", file=sys.stderr)
-        print("  https://aistudio.google.com/apikey 에서 발급", file=sys.stderr)
+        print("오류: OPENAI_API_KEY 환경변수를 설정하세요", file=sys.stderr)
+        print("  https://platform.openai.com/api-keys 에서 발급", file=sys.stderr)
         return False
 
-    # Gemini 한국어 렌더링 불안정 → 영문 스타일 프롬프트 사용
+    if size not in OPENAI_VALID_SIZES:
+        print(f"오류: size는 {sorted(OPENAI_VALID_SIZES)} 중 하나여야 합니다", file=sys.stderr)
+        return False
+    if quality not in OPENAI_VALID_QUALITIES:
+        print(f"오류: quality는 {sorted(OPENAI_VALID_QUALITIES)} 중 하나여야 합니다", file=sys.stderr)
+        return False
+    if output_format not in OPENAI_VALID_FORMATS:
+        print(f"오류: output_format은 {sorted(OPENAI_VALID_FORMATS)} 중 하나여야 합니다", file=sys.stderr)
+        return False
+
     style_prompts = {
         'diagram':    'Technical architecture diagram. Rounded-corner boxes connected by arrows. Light gray box backgrounds with dark text. Orange or blue accent for key nodes. White background. Large, clear labels inside boxes.',
         'infographic':'Business infographic. Data represented with icons and large bold numbers. Card-based layout. Orange/blue accents. Small clear labels. White or light beige background.',
@@ -635,87 +654,60 @@ def generate_gemini_image(prompt, output_path, style=None, api_key=None, count=1
 
 [Text rendering — critical]
 - All text must be sharp, large, and high-contrast
-- Use English labels only (Korean text may render incorrectly)
+- Prefer English labels; if Korean is required, use short common words only
 - Minimize text; use short keywords/labels only
 - No text overlap with other visual elements
 """
 
-    base_prompt = f"{prompt}\n\n{design_guide}"
+    full_prompt = f"{prompt}\n\n{design_guide}"
     if style and style in style_prompts:
-        base_prompt += f"\nStyle: {style_prompts[style]}"
+        full_prompt += f"\nStyle: {style_prompts[style]}"
     else:
-        base_prompt += "\nStyle: Professional business document visual. White background, clean readable design."
-
-    variant_suffixes = [
-        '',
-        ' Variant 2: slightly different layout arrangement and color emphasis.',
-        ' Variant 3: alternative composition with different visual hierarchy.',
-    ]
+        full_prompt += "\nStyle: Professional business document visual. White background, clean readable design."
 
     try:
-        from google import genai
-        from google.genai import types
-
-        client = genai.Client(api_key=key)
-        models_to_try = [
-            "gemini-2.0-flash-exp-image-generation",
-            "gemini-2.0-flash-exp",
-            "gemini-2.0-flash",
-        ]
-
-        out_base = Path(output_path)
-        stem = out_base.stem
-        success_count = 0
-
-        for v_idx in range(count):
-            full_prompt = base_prompt + variant_suffixes[min(v_idx, len(variant_suffixes) - 1)]
-
-            response = None
-            for model_name in models_to_try:
-                try:
-                    response = client.models.generate_content(
-                        model=model_name,
-                        contents=full_prompt,
-                        config=types.GenerateContentConfig(
-                            response_modalities=['TEXT', 'IMAGE'],
-                        ),
-                    )
-                    if response.candidates:
-                        break
-                except Exception:
-                    continue
-
-            if not response or not response.candidates:
-                print(f"변형 {v_idx + 1}: 응답 없음", file=sys.stderr)
-                continue
-
-            for part in response.candidates[0].content.parts:
-                if part.inline_data is not None:
-                    image_data = part.inline_data.data
-                    ext_map = {'image/png': '.png', 'image/jpeg': '.jpg', 'image/webp': '.webp'}
-                    ext = ext_map.get(part.inline_data.mime_type, '.png')
-
-                    if count == 1:
-                        out = out_base if out_base.suffix else out_base.with_suffix(ext)
-                    else:
-                        out = out_base.parent / f'{stem}_v{v_idx + 1}{ext}'
-
-                    out.parent.mkdir(parents=True, exist_ok=True)
-                    out.write_bytes(
-                        base64.b64decode(image_data) if isinstance(image_data, str) else image_data
-                    )
-                    print(f"이미지 생성 완료: {out}")
-                    success_count += 1
-                    break
-
-        return success_count > 0
-
+        from openai import OpenAI
     except ImportError:
-        print("google-genai 패키지 필요: pip install google-genai", file=sys.stderr)
+        print("openai 패키지 필요: pip install openai", file=sys.stderr)
         return False
+
+    try:
+        client = OpenAI(api_key=key)
+        result = client.images.generate(
+            model=OPENAI_IMAGE_MODEL,
+            prompt=full_prompt,
+            n=count,
+            size=size,
+            quality=quality,
+            output_format=output_format,
+        )
     except Exception as e:
-        print(f"Gemini API 오류: {e}", file=sys.stderr)
+        print(f"OpenAI API 오류: {e}", file=sys.stderr)
         return False
+
+    ext_map = {'png': '.png', 'jpeg': '.jpg', 'webp': '.webp'}
+    ext = ext_map[output_format]
+    out_base = Path(output_path)
+    stem = out_base.stem
+
+    success_count = 0
+    for i, datum in enumerate(result.data or []):
+        b64 = getattr(datum, 'b64_json', None)
+        if not b64:
+            print(f"이미지 {i + 1}: 응답에 b64_json이 없습니다", file=sys.stderr)
+            continue
+
+        if count == 1:
+            out = out_base if out_base.suffix else out_base.with_suffix(ext)
+        else:
+            out = out_base.parent / f'{stem}_v{i + 1}{ext}'
+
+        out.parent.mkdir(parents=True, exist_ok=True)
+        out.write_bytes(base64.b64decode(b64))
+        print(f"이미지 생성 완료: {out}")
+        success_count += 1
+
+    return success_count > 0
 
 
 # ─────────────────────────────────────────────
@@ -755,15 +747,25 @@ def main():
     parser = argparse.ArgumentParser(description='시각 자료 생성기 v2')
     subparsers = parser.add_subparsers(dest='command')
 
-    # gemini
-    p_g = subparsers.add_parser('gemini', help='Gemini 이미지 생성 (아키텍처, 개념도 등)')
+    # openai (gpt-image-2)
+    p_g = subparsers.add_parser('openai', aliases=['image'],
+                                help='OpenAI gpt-image-2 이미지 생성 (아키텍처, 개념도 등)')
     p_g.add_argument('prompt', help='생성할 이미지 설명 (영문 권장)')
     p_g.add_argument('-o', '--output', required=True)
     p_g.add_argument('--style', choices=[
         'diagram', 'infographic', 'flowchart', 'chart', 'timeline', 'service', 'comparison'
     ])
     p_g.add_argument('--count', type=int, default=1, metavar='N',
-                     help='생성할 변형 수 (기본 1, 최대 3)')
+                     help='생성할 이미지 수 (n 파라미터, 기본 1)')
+    p_g.add_argument('--size', default='auto',
+                     choices=sorted(OPENAI_VALID_SIZES),
+                     help='이미지 크기 (기본 auto)')
+    p_g.add_argument('--quality', default='auto',
+                     choices=sorted(OPENAI_VALID_QUALITIES),
+                     help='이미지 품질 (기본 auto)')
+    p_g.add_argument('--format', dest='output_format', default='png',
+                     choices=sorted(OPENAI_VALID_FORMATS),
+                     help='출력 포맷 (기본 png)')
     p_g.add_argument('--api-key')
 
     # mermaid
@@ -786,9 +788,11 @@ def main():
 
     args = parser.parse_args()
 
-    if args.command == 'gemini':
-        generate_gemini_image(args.prompt, args.output,
-                              args.style, args.api_key, args.count)
+    if args.command in ('openai', 'image'):
+        generate_openai_image(args.prompt, args.output,
+                              style=args.style, api_key=args.api_key,
+                              count=args.count, size=args.size,
+                              quality=args.quality, output_format=args.output_format)
 
     elif args.command == 'mermaid':
         generate_mermaid(args.code, args.output, args.theme)

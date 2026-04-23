@@ -174,8 +174,8 @@ description: "사업계획서 초안 작성 + 휴먼라이징 + 시각자료 생
 | 대상 | 생성 방법 |
 |------|---------|
 | TAM/SAM/SOM 차트 | matplotlib bar/line |
-| 시스템 아키텍처 | Gemini(영문) 또는 mermaid |
-| 핵심 알고리즘 플로우 | mermaid 또는 Gemini |
+| 시스템 아키텍처 | OpenAI gpt-image-2(영문) 또는 mermaid |
+| 핵심 알고리즘 플로우 | mermaid 또는 OpenAI gpt-image-2 |
 | 경쟁사 비교 레이더 | matplotlib radar |
 | 투자 로드맵 타임라인 | matplotlib timeline |
 | TRL 진행도 | matplotlib horizontal bar |

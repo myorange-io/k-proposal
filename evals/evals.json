@@ -167,7 +167,7 @@
         "Phase 3: 협업 모드 의사결정 질문 (사업명, 예산, 목표)",
         "Phase 3: 팩트체크 3단계 검증 수행",
         "Phase 3.5: 휴먼라이징 자동 수행",
-        "Phase 3.7: 시각 자료 생성 (matplotlib + Gemini)",
+        "Phase 3.7: 시각 자료 생성 (matplotlib + OpenAI gpt-image-2)",
         "Phase 4: HWPX 메인 산출물 생성 (fill + 후처리 + 이미지 삽입)",
         "Phase 4: test_hwpx.py 검증 실행 — 0개 FAIL 확인",
         "Phase 5: AI 검토 + 광탈 패턴 최종 점검",
