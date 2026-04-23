@@ -133,6 +133,7 @@ python scripts/test_hwpx.py 제출용.hwpx --orig 원본양식.hwpx
 
 ## fill_data.json 형식
 
+기본 형식 (단일 텍스트):
 ```json
 {
   "cells": [
@@ -142,7 +143,21 @@ python scripts/test_hwpx.py 제출용.hwpx --orig 원본양식.hwpx
 }
 ```
 
-`table_index`: -1은 섹션 마커(무시). `preserve_style`: true면 기존 스타일 유지.
+확장 형식 (rich content) — 줄바꿈·다중 단락·부분 강조:
+```json
+{
+  "cells": [
+    {"table_index": 5, "row": 1, "col": 1, "text": "줄1\n줄2"},
+    {"table_index": 5, "row": 2, "col": 1, "lines": ["1.항목", "2.항목"]},
+    {"table_index": 5, "row": 3, "col": 1, "char_shape_id": 14, "text": "셀 헤딩"},
+    {"table_index": 5, "row": 4, "col": 1, "runs": [
+      {"text": "매출 "}, {"text": "5억원", "char_shape_id": 37}, {"text": " 달성"}
+    ]}
+  ]
+}
+```
+
+`table_index`: -1은 섹션 마커(무시). `preserve_style`: true면 기존 스타일 유지. `char_shape_id`는 양식의 charShape ID — `_workspace/00_input/style_catalog.json`(suggestedRoles)에서 적절 ID 선택. writer가 작성하고 hwpx_handler.set_cell_rich가 자동 적용한다.
 
 ---
 

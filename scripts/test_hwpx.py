@@ -17,6 +17,7 @@ HWPX 파일 검증 스크립트
   [STYLE]     section0.xml의 charPrIDRef가 유효한 ID 참조
   [IMAGE]     BinData/ 이미지 파일과 content.hpf manifest 일치
   [IMAGE]     section0.xml의 binaryItemIDRef가 manifest에 등록된 ID 참조
+  [MARKUP]    <hp:t> 텍스트 노드에 마크다운 마크업(**·__) 또는 \n 잔존 없음
   [DIFF]      변경된 단락의 linesegarray가 빈 태그로 교체됨 (--orig 필요)
   [DIFF]      원본 대비 텍스트 변경 비율 (0%이면 채우기 실패 의심)
 """
@@ -310,6 +311,40 @@ def check_images(hwpx_path, r):
                f'BinData 없음: {", ".join(orphan_manifest)}')
 
 
+def check_markup_residue(hwpx_path, r):
+    """fill 후 마크업 잔존 검사 — writer가 의도치 않게 인라인 마크업을 남기거나
+    줄바꿈이 텍스트 노드에 그대로 박힌 경우를 검출 (set_cell_rich가 처리했어야 함)."""
+    bold_pat = re.compile(r'\*\*[^*\s][^*]*\*\*')
+    under_pat = re.compile(r'__[^_\s][^_]*__')
+    text_pat = re.compile(r'<hp:t[^>]*>([^<]*)</hp:t>', re.DOTALL)
+
+    issues = 0
+    samples = []
+    with zipfile.ZipFile(hwpx_path) as zf:
+        for name in zf.namelist():
+            if not (name.startswith('Contents/section') and name.endswith('.xml')):
+                continue
+            content = zf.read(name).decode('utf-8', errors='replace')
+            for m in text_pat.finditer(content):
+                t = m.group(1)
+                if not t:
+                    continue
+                if bold_pat.search(t):
+                    issues += 1
+                    if len(samples) < 3: samples.append(f'{name}: bold마크업: {t[:40]!r}')
+                elif under_pat.search(t):
+                    issues += 1
+                    if len(samples) < 3: samples.append(f'{name}: underline마크업: {t[:40]!r}')
+                elif '\n' in t:
+                    issues += 1
+                    if len(samples) < 3: samples.append(f'{name}: 줄바꿈잔존: {t[:40]!r}')
+    if issues:
+        detail = '; '.join(samples) if samples else ''
+        r.fail(f'[MARKUP] 텍스트 노드에 마크업/줄바꿈 잔존 {issues}건', detail)
+    else:
+        r.ok('[MARKUP] 텍스트 노드 마크업/줄바꿈 잔존 없음')
+
+
 def check_rhwp(hwpx_path, r):
     """@rhwp/core WASM 파서로 실제 파싱 + 렌더링 가능 여부 검증"""
     import subprocess as _sp
@@ -439,6 +474,7 @@ def validate(hwpx_path, orig_path=None, use_rhwp=False):
         check_required_ns_declarations(hwpx_path, r)
         check_charpr(hwpx_path, r)
         check_images(hwpx_path, r)
+        check_markup_residue(hwpx_path, r)
 
         if use_rhwp:
             check_rhwp(hwpx_path, r)

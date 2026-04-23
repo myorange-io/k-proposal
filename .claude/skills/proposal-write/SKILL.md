@@ -51,6 +51,40 @@ description: "사업계획서 초안 작성 + 휴먼라이징 + 시각자료 생
 ### TAM/SAM/SOM 셀 강제
 시장규모 섹션은 `references/research-quality-rules.md` §4 산식 템플릿대로 TAM·SAM·SOM 3셀 모두 산식·출처·가정 보수성 근거를 작성한다. reviewer 양식 게이트가 누락 시 차단한다.
 
+## fill.json 풍부 표현 (rich content)
+
+`draft_fill.json`은 단순 `text` 외에 다음 필드로 강조·줄바꿈·다중 단락을 표현할 수 있다. 양식의 글자 모양(charShape)을 직접 지정해 양식 100% 호환되는 결과를 만든다.
+
+| 필드 | 효과 | 예시 |
+|------|------|------|
+| `text: "줄1\n줄2"` | 줄바꿈 (`<hp:lineBreak/>`) | 한 셀 안 다중 행 |
+| `lines: ["a","b","c"]` | 다중 단락(별도 `<hp:p>`) | 항목 나열 |
+| `paragraphs: [...]` | 셀 내 다중 단락(각 단락이 text/runs/char_shape_id) | 세분화된 단락 분리 |
+| `char_shape_id: N` | 셀 전체에 charPrIDRef 적용 | 헤딩급 강조 |
+| `runs: [{text, char_shape_id}, ...]` | 셀 내 부분 강조 | 핵심 수치만 bold |
+
+### 입력
+- `_workspace/00_input/style_catalog.json` — `proposal-analyze`가 양식에서 추출한 charShape 카탈로그. `suggestedRoles`(bodyEmphasis/heading1/heading2/tableHeader)를 그대로 활용
+
+### 강조 휴리스틱 (실 사례 기반)
+- **본문 정량 수치**(매출액·시장규모·%·억/조 단위) → `runs`로 분리해 `bodyEmphasis` 적용. 본문의 ~16% 비율 권장
+- **표 안 다중 항목/연도 변화** → `lines` 또는 `\n`으로 줄바꿈 (학력/경력/실적 셀 패턴)
+- **핵심 주장 1문장/단락** → `bodyEmphasis`로 강조
+- **셀 머리글** → `tableHeader`
+- **양식이 보유하지 않은 새 강조** → `bold_keywords.json` 후처리(postprocess Step 5)로 보강
+
+### 예시 — 매출 셀
+```json
+{"table_index": 5, "row": 3, "col": 1,
+ "runs": [
+   {"text": "2024년 매출 "},
+   {"text": "5억원", "char_shape_id": 37},
+   {"text": " (전년 대비 "},
+   {"text": "120%", "char_shape_id": 37},
+   {"text": " 성장)"}
+ ]}
+```
+
 ---
 
 ## Step 0: 광탈 패턴 사전 배제

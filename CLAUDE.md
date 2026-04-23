@@ -38,6 +38,7 @@ Key routing rules:
 **변경 이력:**
 | 날짜 | 변경 내용 | 대상 | 사유 |
 |------|----------|------|------|
+| 2026-04-23 | 스타일 충실도 향상: 양식 charShape 카탈로그 자동 추출 + fill rich content(charShapeId·runs·줄바꿈·다중 단락) 지원 + test_hwpx 마크업 잔존 검사 | extract_style_catalog, hwpx_handler.set_cell_rich, proposal-analyze, proposal-write, writer 에이전트, test_hwpx | 양식의 폰트/크기/강조/줄바꿈을 정확히 반영 (실제 사례 분석 기반 휴리스틱) |
 | 2026-04-16 | rhwp 참고 반영: @rhwp/core WASM 검증, 누름틀 필드 API, LINE_SEG 모니터링, xml-internals 크로스레퍼런스 보강 | hwpx_handler, auto_template_map, xml-internals, test_hwpx | rhwp 프로젝트 분석 결과 반영 |
 | 2026-04-16 | 작성요령 자동 추출: guide_table_contents 추출 + writing_guide_full 연동 | auto_template_map, proposal-write, proposal-analyze | 양식 작성요령을 writer에 자동 전달 |
 | 2026-04-10 | gstack 패턴 스킬 분리: 6개 독립 스킬 + 오케스트레이터 | 전체 | 모놀리식 1,768줄 → 스킬별 분리 |
