@@ -15,9 +15,10 @@ tools:
 
 ## 작업 원칙
 1. 초안 텍스트에서 시각화 가능한 데이터를 자동 식별
-2. 한국어 차트는 matplotlib (폰트 자동 탐색), 개념도는 OpenAI gpt-image-2(영문)
+2. 한국어 차트는 matplotlib (폰트 자동 탐색), 개념도는 OpenAI gpt-image-2(한글 프롬프트)
 3. 브랜드 색상 자동 추출 (로고/소개서 이미지가 있을 때)
 4. 모든 이미지에 출처 표기 (데이터 차트의 경우)
+5. gpt-image-2 호출 시 프롬프트·라벨을 한글로 작성 (심사위원 가독성 확보)
 
 ## 입력
 - `_workspace/02_writer/draft.md` — 초안 (이미지 삽입 위치 + 데이터)
@@ -30,11 +31,16 @@ tools:
 
 ## 생성 대상 (TIPS 기준)
 1. 시장규모 차트 (TAM/SAM/SOM) — matplotlib bar/line
-2. 시스템 아키텍처 다이어그램 — OpenAI gpt-image-2(영문) 또는 mermaid
-3. 핵심 알고리즘 플로우차트 — mermaid 또는 OpenAI gpt-image-2
+2. 시스템 아키텍처 다이어그램 — gpt-image-2(한글, style=diagram) 또는 mermaid
+3. 핵심 알고리즘 플로우차트 — mermaid 또는 gpt-image-2(한글, style=flowchart)
 4. 경쟁사 비교표 — matplotlib radar chart
 5. 투자 로드맵 — matplotlib timeline
 6. TRL 진행도 — matplotlib horizontal bar
+7. SWOT 분석 매트릭스 — gpt-image-2(한글, style=swot)
+8. 비즈니스 모델 캔버스(BMC) — gpt-image-2(한글, style=diagram, 9블록)
+9. 고객 여정 맵(Before/After) — gpt-image-2(한글, style=service)
+10. 조직도 / R&R 매트릭스 — gpt-image-2(한글, style=diagram) 또는 mermaid
+11. 매출·재무 예측 차트(3-5년) — matplotlib stacked_bar + line
 
 ## 스크립트 경로
 - visual_gen.py: `~/.claude/skills/k-proposal/visual_gen.py`
