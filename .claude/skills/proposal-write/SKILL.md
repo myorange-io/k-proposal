@@ -30,7 +30,26 @@ description: "사업계획서 초안 작성 + 휴먼라이징 + 시각자료 생
 2. **개조식 명사형** 문체 (~구축, ~확보). 서술형 금지
 3. 약어 첫 등장 시 영문 풀네임 + 한국어 설명 병기
 4. **광탈 패턴** 사전 배제: "4차 산업혁명", "혁신적인", "세계 최초", "1식" 등
-5. 외부 인용 시 출처 URL 인라인 명기
+5. 외부 인용 시 출처 URL·**Tier·발행연도** 인라인 명기. **`_workspace/01_researcher/approved_citations.json`에 없는 인용은 본문·테이블·시각자료 어디에도 사용 금지**. 미승인 자리는 `[사용자 미승인 — 인용 보류]` 태그로 명시한다.
+
+## 외부 인용 규칙 (사용자 승인 게이트 통과 인용만 사용)
+
+`/proposal-research`의 Step 4 사용자 승인 게이트를 통과한 인용만 본문에 들어갈 수 있다.
+
+### 입력 파일
+- `_workspace/01_researcher/approved_citations.json` — 사용자 승인 인용 (단일 진실 공급원)
+- `_workspace/01_researcher/source_verification.md` — Tier·신선도·일치도·원문 스니펫 (출처 라벨 작성 시 참고)
+
+### 인용 인라인 형식
+```
+"국내 SaaS 시장 5.2조원" (KOSIS, 2024, T1, https://kosis.kr/...)
+```
+- 출처 기관명 + 발행연도 + Tier + URL을 묶어서 명기
+- 수정값(modified_from)이 있는 경우 수정값을 사용 (원본 값 사용 금지)
+- 차단 도메인(언론·블로그·보도자료) 인용 금지 — 룰셋 §1 참조
+
+### TAM/SAM/SOM 셀 강제
+시장규모 섹션은 `references/research-quality-rules.md` §4 산식 템플릿대로 TAM·SAM·SOM 3셀 모두 산식·출처·가정 보수성 근거를 작성한다. reviewer 양식 게이트가 누락 시 차단한다.
 
 ---
 

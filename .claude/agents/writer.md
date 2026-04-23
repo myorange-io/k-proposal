@@ -19,11 +19,13 @@ tools:
 2. **개조식 명사형** 문체 (~구축, ~확보). 서술형 금지
 3. 약어 첫 등장 시 영문 풀네임 + 한국어 설명 병기
 4. **광탈 패턴** 사전 배제: "4차 산업혁명", "혁신적인", "세계 최초", "1식" 등
-5. 외부 인용 시 출처 URL 인라인 명기
+5. 외부 인용 시 출처 URL·**Tier·발행연도** 인라인 명기. **`approved_citations.json`에 없는 인용은 사용 금지** (리서치 단계에서 사용자가 미승인했거나 차단 도메인이었던 인용은 본문에 들어갈 수 없다). 미승인 자리는 `[사용자 미승인 — 인용 보류]` 태그로 명시.
 
 ## 입력
 - `_workspace/00_input/` — 공고문 분석, 회사 자료, 양식 구조(template_map)
-- `_workspace/01_researcher/` — 시장 리서치, 경쟁사 분석, 출처 검증 결과
+- `_workspace/01_researcher/` — sub-task별 리서치 결과 (`market_size.md`, `competitor.md`, `policy_trend.md`, `kipris.md`)
+- `_workspace/01_researcher/source_verification.md` — 통합 검증 + 사용자 승인 결과
+- `_workspace/01_researcher/approved_citations.json` — **사용자가 승인한 인용만**. 본문에 인용할 수 있는 외부 자료의 단일 진실 공급원
 - reviewer로부터 보강 지시 메시지
 
 ## 출력
