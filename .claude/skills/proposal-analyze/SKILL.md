@@ -152,6 +152,25 @@ python scripts/auto_template_map.py "양식.hwpx" -o template_map.json \
   --enrich-sections templates/tips/sections_연구개발계획서_template.json
 ```
 
+### 스타일 카탈로그 추출 (필수, charShapeId 기반)
+
+양식의 글자 모양(charShape) 카탈로그를 추출해 `_workspace/00_input/style_catalog.json`으로 저장한다. writer가 본문/표 안에서 부분 강조·헤딩 스타일을 적용할 때 이 카탈로그의 `charShapeId`를 직접 지정한다 (인라인 마크업 휴리스틱이 아닌 양식 100% 호환 방식).
+
+```bash
+node scripts/extract_style_catalog.mjs "양식.hwpx" \
+  --out _workspace/00_input/style_catalog.json
+```
+
+산출물 구조:
+- `charShapeCatalog`: 양식에서 사용된 모든 charShape (id·폰트·크기·bold·색상·사용 빈도·샘플)
+- `cellStyles`: 각 셀의 기본 charShapeId (writer가 이를 보존하면서 부분 강조만 추가)
+- `suggestedRoles`: 자동 추론된 역할 매핑 (`bodyDefault`, `bodyEmphasis`, `heading1`, `heading2`, `tableHeader`, `tableBody`)
+
+writer는 이 매핑을 받아 다음과 같이 활용한다:
+- 핵심 수치 강조 → `bodyEmphasis` ID
+- 셀 머리글 → `tableHeader` ID
+- 본문 기본 → 양식의 셀 기본 ID 그대로 (preserve_style)
+
 ---
 
 ## Step 3: 준비자료 생성
@@ -186,6 +205,8 @@ template_dir: templates/tips/ | templates/startup/ | templates/scaleup/ | templa
 ## 입력/출력
 
 - **입력**: 프로젝트 폴더의 HWPX/HWP/PDF 파일
-- **출력**: `_workspace/00_input/준비자료.md`
-- **참조 스크립트**: `scripts/auto_template_map.py`, `skill/text_sanitizer.py`
+- **출력**:
+  - `_workspace/00_input/준비자료.md`
+  - `_workspace/00_input/style_catalog.json` — 양식의 charShape 카탈로그 + 자동 추론 역할 매핑
+- **참조 스크립트**: `scripts/auto_template_map.py`, `scripts/extract_style_catalog.mjs`, `skill/text_sanitizer.py`
 - **다음 단계**: `/proposal-research`

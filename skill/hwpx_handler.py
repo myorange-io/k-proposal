@@ -419,7 +419,13 @@ class HwpxHandler:
 
         빈 셀(<hp:t> 없음)인 경우에만 기존 run 내에 <hp:t>를 생성한다.
         기존 run도 없으면 최소한의 구조를 생성한다.
+
+        텍스트에 줄바꿈(\\n)이 포함되면 set_cell_rich로 위임하여 <hp:lineBreak/>로 변환한다.
         """
+        # 줄바꿈은 단순 t.text 교체로 표현 안 됨 — rich 경로로 위임
+        if isinstance(text, str) and '\n' in text:
+            return self.set_cell_rich(cell, text, preserve_style=preserve_style)
+
         sublists = cell.findall(f'{HP}subList')
         if not sublists:
             return False
@@ -506,6 +512,114 @@ class HwpxHandler:
                 seg.set('horzpos', '0')
                 seg.set('horzsize', '0')
                 seg.set('flags', '393216')
+        return True
+
+    def _find_donor_attrs(self, cell):
+        """셀의 첫 paragraph/run에서 스타일 속성을 추출 (rich content 작성 시 양식 보존용)."""
+        donor_para_attrs = {}
+        donor_run_attrs = {}
+        sublist = cell.find(f'{HP}subList')
+        if sublist is None:
+            return donor_para_attrs, donor_run_attrs
+        first_p = sublist.find(f'{HP}p')
+        if first_p is not None:
+            donor_para_attrs = dict(first_p.attrib)
+            first_run = first_p.find(f'{HP}run')
+            if first_run is not None:
+                donor_run_attrs = dict(first_run.attrib)
+        # 같은 셀에서 못 찾으면 같은 테이블의 다른 셀에서 시도
+        if not donor_run_attrs:
+            table = cell.getparent()
+            while table is not None and not table.tag.endswith('}tbl'):
+                table = table.getparent()
+            if table is not None:
+                for run in table.iter(f'{HP}run'):
+                    if run.attrib:
+                        donor_run_attrs = dict(run.attrib)
+                        break
+        return donor_para_attrs, donor_run_attrs
+
+    @staticmethod
+    def _add_text_to_run(run, text):
+        """run 안에 텍스트를 추가하면서 \\n을 <hp:lineBreak/>로 변환한다."""
+        if not text:
+            return
+        parts = text.split('\n')
+        for i, part in enumerate(parts):
+            if i > 0:
+                etree.SubElement(run, f'{HP}lineBreak')
+            if part:
+                t = etree.SubElement(run, f'{HP}t')
+                t.text = part
+
+    @staticmethod
+    def _normalize_to_paragraphs(content):
+        """다양한 입력 형태를 [{text|runs}, ...] 단락 리스트로 정규화."""
+        if isinstance(content, str):
+            return [{'text': content}]
+        if not isinstance(content, dict):
+            return [{'text': str(content)}]
+        if 'paragraphs' in content:
+            out = []
+            for p in content['paragraphs']:
+                out.append({'text': p} if isinstance(p, str) else p)
+            return out
+        if 'lines' in content:
+            return [{'text': line} for line in content['lines']]
+        # 단일 단락 (text 또는 runs)
+        return [content]
+
+    def set_cell_rich(self, cell, content, preserve_style=True):
+        """셀에 강조·줄바꿈·다중 단락이 포함된 콘텐츠를 적용한다.
+
+        content 형태:
+          - str — 단일 단락 텍스트 (\\n은 lineBreak로 변환)
+          - {"text": "...", "char_shape_id": N} — 단일 단락에 charPrIDRef 적용
+          - {"runs": [{"text":"...","char_shape_id":N}, ...]} — 단락 내 다중 run
+          - {"paragraphs": [<위 셋 중 하나>, ...]} — 셀 내 다중 단락
+          - {"lines": ["줄1","줄2"]} — 단순 다중 단락 (각 줄을 별도 단락)
+
+        char_shape_id가 명시되면 양식 기본 charPrIDRef 대신 사용된다.
+        명시되지 않으면 양식의 기본 스타일이 보존된다.
+        """
+        sublists = cell.findall(f'{HP}subList')
+        if not sublists:
+            return False
+        sublist = sublists[0]
+
+        # 기본 스타일을 추출한 뒤 기존 단락들을 제거
+        donor_para_attrs, donor_run_attrs = self._find_donor_attrs(cell)
+        if not preserve_style:
+            donor_run_attrs = {**donor_run_attrs, 'charPrIDRef': '79'}
+
+        for old_p in list(sublist.findall(f'{HP}p')):
+            sublist.remove(old_p)
+
+        paragraphs = self._normalize_to_paragraphs(content)
+        if not paragraphs:
+            paragraphs = [{'text': ''}]
+
+        for para_spec in paragraphs:
+            new_p = etree.SubElement(sublist, f'{HP}p')
+            for k, v in donor_para_attrs.items():
+                new_p.set(k, v)
+
+            runs = para_spec.get('runs')
+            if runs is None:
+                runs = [{'text': para_spec.get('text', ''),
+                         'char_shape_id': para_spec.get('char_shape_id')}]
+
+            for run_spec in runs:
+                new_run = etree.SubElement(new_p, f'{HP}run')
+                for k, v in donor_run_attrs.items():
+                    new_run.set(k, v)
+                csid = run_spec.get('char_shape_id')
+                if csid is not None:
+                    new_run.set('charPrIDRef', str(csid))
+                self._add_text_to_run(new_run, run_spec.get('text', ''))
+
+            # linesegarray는 비워둬서 한글이 줄 레이아웃을 재계산하도록 유도
+            etree.SubElement(new_p, f'{HP}linesegarray')
         return True
 
     def add_rows(self, table, count=1, template_row=None):
@@ -1309,8 +1423,20 @@ def cmd_fill(args):
             continue
         ok_count += 1
         if not validate_only:
-            handler.set_cell_text(cell, item['text'], preserve_style=item.get('preserve_style', True))
-            print(f"T{ti}[{r},{c}] = \"{item['text'][:30]}...\"")
+            preserve = item.get('preserve_style', True)
+            # rich content (runs/paragraphs/lines/char_shape_id) 가 있으면 set_cell_rich
+            if any(k in item for k in ('runs', 'paragraphs', 'lines', 'char_shape_id')):
+                content = {k: v for k, v in item.items()
+                           if k in ('text', 'runs', 'paragraphs', 'lines', 'char_shape_id')}
+                handler.set_cell_rich(cell, content, preserve_style=preserve)
+                preview = (item.get('text') or
+                           (item.get('runs', [{}])[0].get('text', '') if item.get('runs') else '') or
+                           (item.get('lines', [''])[0] if item.get('lines') else '') or
+                           '<rich>')
+                print(f"T{ti}[{r},{c}] = \"{preview[:30]}...\" [rich]")
+            else:
+                handler.set_cell_text(cell, item['text'], preserve_style=preserve)
+                print(f"T{ti}[{r},{c}] = \"{item['text'][:30]}...\"")
 
     if validate_only:
         print(f"\n검증 결과: {ok_count}개 OK, {len(errors)}개 오류")

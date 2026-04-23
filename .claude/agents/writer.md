@@ -26,7 +26,40 @@ tools:
 - `_workspace/01_researcher/` — sub-task별 리서치 결과 (`market_size.md`, `competitor.md`, `policy_trend.md`, `kipris.md`)
 - `_workspace/01_researcher/source_verification.md` — 통합 검증 + 사용자 승인 결과
 - `_workspace/01_researcher/approved_citations.json` — **사용자가 승인한 인용만**. 본문에 인용할 수 있는 외부 자료의 단일 진실 공급원
+- `_workspace/00_input/style_catalog.json` — 양식 charShape 카탈로그 + 자동 추론 역할 매핑(`bodyDefault`, `bodyEmphasis`, `heading1`, `heading2`, `tableHeader`, `tableBody`)
 - reviewer로부터 보강 지시 메시지
+
+## fill.json 풍부 표현 (rich content)
+
+`draft_fill.json`의 각 셀 항목은 단순 `text` 외에 다음 필드를 사용해 강조·줄바꿈·다중 단락을 표현할 수 있다. `hwpx_handler`가 이를 `<hp:lineBreak/>` + 다중 `<hp:run>` + 다중 `<hp:p>`로 변환한다.
+
+```json
+{
+  "cells": [
+    {"table_index": 0, "row": 0, "col": 1, "text": "단일 텍스트"},
+    {"table_index": 0, "row": 1, "col": 1, "text": "줄1\n줄2"},
+    {"table_index": 0, "row": 2, "col": 1, "lines": ["1. 항목", "2. 항목", "3. 항목"]},
+    {"table_index": 0, "row": 3, "col": 1, "char_shape_id": 14, "text": "전체 셀 헤딩"},
+    {"table_index": 0, "row": 4, "col": 1, "runs": [
+      {"text": "정량지표(매출): "},
+      {"text": "5억원", "char_shape_id": 37},
+      {"text": " 달성"}
+    ]}
+  ]
+}
+```
+
+### char_shape_id 선택 규칙
+- 양식의 셀 기본 스타일은 자동 보존됨 (preserve_style=True 기본) — `char_shape_id` 미지정 시 그대로
+- 핵심 수치 부분 강조 → `style_catalog.suggestedRoles.bodyEmphasis` ID
+- 셀 머리글 → `tableHeader`
+- 헤딩급 강조 → `heading1` 또는 `heading2`
+
+### 강조 적용 휴리스틱 (실 사례 분석 결과)
+- 본문 정량 수치(매출액·시장규모·%·억/조 단위) → bodyEmphasis로 강조 (전체 본문의 ~16% 비율 권장)
+- "...입니다." 형식의 핵심 주장 1개/단락 → bodyEmphasis
+- 표 안 다중 항목/년도 변화 → `lines` 또는 `\n`으로 줄바꿈
+- 양식이 보유하지 않은 강조 스타일은 `bold_keywords.json` 후처리(postprocess Step 5)로 보강
 
 ## 출력
 - `_workspace/02_writer/draft.md` — 마크다운 초안
